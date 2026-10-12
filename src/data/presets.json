@@ -1,0 +1,13 @@
+{
+  "_note": "Example builds from the design doc ('golden builds'). The tests check that the engine produces what the doc describes; the lab offers them as starting points. spine is handle -> tip. flanks maps gap index (0 = between S1 and S2) to a crystal.",
+  "presets": [
+    { "id": "spark", "name": "A Stick and a Spark", "grip": "chalk", "shaft": "chalk", "cap": "chalk", "spine": ["fire"], "flanks": {} },
+    { "id": "basalt-a", "name": "Basalt: Earth → Twinspar → Fire", "grip": "basalt", "shaft": "basalt", "cap": "basalt", "spine": ["earth", "twinspar", "fire"], "flanks": {} },
+    { "id": "basalt-b", "name": "Basalt: Earth → Fire → Twinspar", "grip": "basalt", "shaft": "basalt", "cap": "basalt", "spine": ["earth", "fire", "twinspar"], "flanks": {} },
+    { "id": "scalding-lance", "name": "Scalding Lance", "grip": "willow", "shaft": "willow", "cap": "willow", "spine": ["water", "fire", "lancet", "swiftquartz"], "flanks": {} },
+    { "id": "storm-shepherd", "name": "Storm Shepherd", "grip": "copper", "shaft": "copper", "cap": "copper", "spine": ["water", "wind", "prismite", "seeker", "echo-opal"], "flanks": { "0": "catalyst" } },
+    { "id": "wildfire-reaper", "name": "Wildfire Reaper", "grip": "ashen-yew", "shaft": "ashen-yew", "cap": "ashen-yew", "spine": ["fire", "wind", "siphon"], "flanks": { "0": "catalyst" } },
+    { "id": "greed-loop", "name": "Greed Loop", "grip": "nautilus", "shaft": "nautilus", "cap": "nautilus", "spine": ["sunstone", "fire", "resonator", "nova"], "flanks": {} },
+    { "id": "golem-breaker", "name": "Golem Breaker", "grip": "whalebone", "shaft": "whalebone", "cap": "whalebone", "spine": ["water", "water", "sunstone", "nova"], "flanks": {} }
+  ]
+}

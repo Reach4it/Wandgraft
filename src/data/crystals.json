@@ -1,0 +1,42 @@
+{
+  "_note": "Crystals available in the Wand Lab. drain = charge cost per projectile it touches; heat = Heat added per shot. Modifier numbers are at Clear quality; quality.strength scales the bonus part of each effect.",
+  "quality": [
+    { "id": "chipped", "name": "Chipped", "strength": 0.6, "load": 1 },
+    { "id": "clear", "name": "Clear", "strength": 1.0, "load": 2 },
+    { "id": "bright", "name": "Bright", "strength": 1.3, "load": 3 },
+    { "id": "flawless", "name": "Flawless", "strength": 1.6, "load": 5 }
+  ],
+  "crystals": [
+    { "id": "fire", "name": "Fire", "kind": "element", "element": "fire", "group": "Elements", "drain": 3, "heat": 1, "power": 10, "color": "#ff6a2b", "text": "Fast burning bolt; ignites" },
+    { "id": "water", "name": "Water", "kind": "element", "element": "water", "group": "Elements", "drain": 3, "heat": 1, "power": 9, "color": "#3b8cff", "text": "Heavy stream; knockback, soaks targets" },
+    { "id": "earth", "name": "Earth", "kind": "element", "element": "earth", "group": "Elements", "drain": 3, "heat": 1, "power": 11, "color": "#b08a4a", "text": "Slow heavy shard; breaks armor" },
+    { "id": "wind", "name": "Wind", "kind": "element", "element": "wind", "group": "Elements", "drain": 3, "heat": 1, "power": 8, "color": "#9fe8d6", "text": "Fastest; pierces and pushes" },
+
+    { "id": "sunstone", "name": "Sunstone", "kind": "modifier", "group": "Power", "drain": 2, "heat": 1, "color": "#ffcc33", "text": "+40% power" },
+    { "id": "twinspar", "name": "Twinspar", "kind": "modifier", "group": "Count", "drain": 2, "heat": 1, "color": "#d0a0ff", "text": "Fires 2 projectiles. Before other crystals: each copy gets them at full cost. After: splits the finished shot" },
+    { "id": "prismite", "name": "Prismite", "kind": "modifier", "group": "Count", "drain": 3, "heat": 1, "color": "#ff9ff3", "text": "Fan of 3 (5 when Flawless); next to Wind widens to a 120° cone" },
+    { "id": "echo-opal", "name": "Echo Opal", "kind": "modifier", "group": "Count", "drain": 2, "heat": 1, "color": "#e8e0ff", "text": "Repeats the shot 0.5 s later at 60%" },
+    { "id": "seedstone", "name": "Seedstone", "kind": "modifier", "group": "Count", "drain": 2, "heat": 1, "color": "#9ad66b", "text": "On impact, bursts into 4 seedlings carrying the shot's elements" },
+
+    { "id": "swiftquartz", "name": "Swiftquartz", "kind": "modifier", "group": "Form", "drain": 1, "heat": 1, "color": "#c9f6ff", "text": "+60% speed; at the tip also +1 pierce" },
+    { "id": "lancet", "name": "Lancet Spinel", "kind": "modifier", "group": "Form", "drain": 2, "heat": 1, "color": "#ff5577", "text": "Pierces through 2 targets; after Fire, each pierce spreads the burn" },
+    { "id": "ricochet", "name": "Ricochet Beryl", "kind": "modifier", "group": "Form", "drain": 2, "heat": 1, "color": "#77ffcc", "text": "Bounces off walls 3 times; after Earth, +15% power per bounce" },
+    { "id": "seeker", "name": "Seeker's Eye Agate", "kind": "modifier", "group": "Form", "drain": 2, "heat": 1, "color": "#ffe08a", "text": "Homes on targets; before a multiplier, copies pick different targets" },
+    { "id": "mortar", "name": "Mortar Jade", "kind": "modifier", "group": "Form", "drain": 2, "heat": 1, "color": "#6bd68a", "text": "Arcing lob over cover; elements land as zones" },
+
+    { "id": "bloatstone", "name": "Bloatstone", "kind": "modifier", "group": "Size", "drain": 2, "heat": 1, "color": "#a0806b", "text": "Bigger, slower, +30% power. With Swiftquartz the size and speed cancel and only power stays" },
+    { "id": "needlepoint", "name": "Needlepoint", "kind": "modifier", "group": "Size", "drain": 1, "heat": 1, "color": "#e6e6e6", "text": "Smaller, faster, +25% critical chance" },
+    { "id": "nova", "name": "Nova Pearl", "kind": "modifier", "group": "Size", "drain": 3, "heat": 1, "color": "#fff0f5", "text": "Explodes on impact; blast type from the elements upstream" },
+    { "id": "lingerite", "name": "Lingerite", "kind": "modifier", "group": "Size", "drain": 2, "heat": 1, "color": "#8ab4ff", "text": "Leaves a lasting zone where it lands" },
+
+    { "id": "thriftstone", "name": "Thriftstone", "kind": "modifier", "group": "Economy", "drain": 0, "heat": 0, "color": "#c0c0a0", "text": "-30% drain; in the root socket also -1 Heat" },
+    { "id": "wellspring", "name": "Wellspring Aquamarine", "kind": "modifier", "group": "Economy", "drain": 0, "heat": 1, "color": "#7fffd4", "text": "+50% recharge" },
+    { "id": "siphon", "name": "Siphon Jet", "kind": "modifier", "group": "Economy", "drain": 1, "heat": 1, "color": "#303040", "text": "30% of damage dealt refills the wand" },
+
+    { "id": "resonator", "name": "Resonator", "kind": "modifier", "group": "Meta", "drain": 2, "heat": 1, "color": "#ff77ff", "text": "Feedback: sends 40% of the shot back to the root to run again; each loop adds 1 Heat" },
+    { "id": "catalyst", "name": "Catalyst", "kind": "modifier", "group": "Meta", "drain": 1, "heat": 1, "color": "#ffaa00", "text": "Adjacent reactions twice as strong; elements within 2 sockets also react" },
+    { "id": "inverter", "name": "Inverter", "kind": "modifier", "group": "Meta", "drain": 1, "heat": 1, "color": "#6060ff", "text": "Reverses the order of every crystal downstream of it" },
+    { "id": "null", "name": "Null Stone", "kind": "modifier", "group": "Meta", "drain": 0, "heat": 0, "color": "#555566", "text": "Blank spacer: stops two crystals from reacting" },
+    { "id": "dampener", "name": "Dampener", "kind": "modifier", "group": "Meta", "drain": 0, "heat": -1, "color": "#88aacc", "text": "-1 Heat; feedback loops capped at 1 and their Heat halved" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "_note": "Wand Lab test dummies (first six from the design doc). category drives Bite and element multipliers. immune = element tags that deal 0.",
+  "dummies": [
+    { "id": "straw", "name": "Straw Dummy", "category": "none", "hp": 300, "color": "#d8c27a", "tests": "Raw damage, damage per second", "behavior": "Stands still; shows a live damage log" },
+    { "id": "stone-sentinel", "name": "Stone Sentinel", "category": "stone", "hp": 400, "shell": 200, "color": "#8a8a90", "tests": "Earth, armor break, Stone Bite", "behavior": "Heavy shell absorbs 75% of damage until cracked; Earth and armor-break hit the shell at full strength" },
+    { "id": "iron-knight", "name": "Iron Knight", "category": "metal", "hp": 350, "ward": 150, "color": "#b0b8c8", "tests": "Metal armor and magic wards", "behavior": "A ward bubble absorbs all damage until broken; Ward Bite (Cold Iron) and Earth break it fast" },
+    { "id": "wisp", "name": "Wisp Lantern", "category": "spirit", "hp": 220, "color": "#c8f0ff", "tests": "Spirit Bite, accuracy", "behavior": "Floats and bobs; phases out (immune) 1.5 s of every 4 s" },
+    { "id": "treant", "name": "Treant Stump", "category": "plant", "hp": 380, "regen": 25, "color": "#5c8a3a", "tests": "Fire, Plant Bite", "behavior": "Regrows 25 health per second unless burning" },
+    { "id": "ember-golem", "name": "Ember Golem", "category": "fireborn", "hp": 420, "immune": ["fire"], "color": "#ff5a1f", "tests": "Element switching", "behavior": "Immune to Fire; forces a second element" }
+  ]
+}

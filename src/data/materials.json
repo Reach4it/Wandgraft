@@ -1,0 +1,52 @@
+{
+  "_note": "Wand body materials. P/C/R/S/Cn on a 1-10 scale (Potency, Capacity, Recharge, Stability, Conductivity). bite = damage multiplier by target category (missing = 1.0). sockets = spine sockets when used as a shaft; flankChance = chance a gap has a flank socket. velocity/tempo default to the family values in families.",
+  "families": {
+    "wood": { "velocity": 1.0, "tempo": 1.0 },
+    "metal": { "velocity": 1.1, "tempo": 0.95 },
+    "stone": { "velocity": 0.85, "tempo": 0.8 },
+    "bone": { "velocity": 1.05, "tempo": 1.05 },
+    "crystal": { "velocity": 1.0, "tempo": 1.0 },
+    "exotic": { "velocity": 1.0, "tempo": 1.0 }
+  },
+  "materials": [
+    { "id": "willow", "name": "Willow", "family": "wood", "P": 4, "C": 5, "R": 7, "S": 6, "Cn": 8, "draw": "Rain and water 60%, wielder 30%, moon 10%", "bite": { "plant": 1.3, "flesh": 1.3 }, "sockets": 4, "flankChance": 0.15, "quirk": "Bends: shots curve slightly toward your aim drift, easy to steer" },
+    { "id": "ironbark", "name": "Ironbark Oak", "family": "wood", "P": 5, "C": 7, "R": 4, "S": 9, "Cn": 5, "draw": "Open ground 50%, wielder 50%", "bite": { "stone": 1.4 }, "sockets": 4, "flankChance": 0.05, "tempo": 0.85, "quirk": "Almost never overloads; slow tempo" },
+    { "id": "ashen-yew", "name": "Ashen Yew", "family": "wood", "P": 7, "C": 4, "R": 3, "S": 5, "Cn": 6, "draw": "Kills 70%, wielder 30%", "bite": { "spirit": 1.5 }, "sockets": 3, "flankChance": 0.1, "quirk": "Graveyard wood; each kill briefly doubles recharge" },
+    { "id": "emberpine", "name": "Emberpine", "family": "wood", "P": 6, "C": 4, "R": 6, "S": 3, "Cn": 6, "draw": "Fire nearby 50%, sun 30%, wielder 20%", "bite": { "plant": 1.3, "flesh": 1.3 }, "sockets": 3, "flankChance": 0.1, "quirk": "Resin ignites when overheated: overloads become fire bursts instead of misfires" },
+    { "id": "hollowreed", "name": "Hollowreed", "family": "wood", "P": 3, "C": 2, "R": 9, "S": 5, "Cn": 7, "draw": "Motion 60%, wind 40%", "bite": { "flesh": 1.3 }, "sockets": 6, "flankChance": 0.25, "tempo": 1.25, "quirk": "Many sockets, tiny reservoir; a fast, fiddly build wand" },
+    { "id": "knotwood", "name": "Knotwood", "family": "wood", "P": 5, "C": 5, "R": 5, "S": 4, "Cn": 5, "draw": "Wielder 100%", "bite": {}, "sockets": 4, "flankChance": 0, "quirk": "One random knot socket per wand that doubles its crystal's effect (lab: the 2nd socket is the knot)" },
+
+    { "id": "copper", "name": "Copper", "family": "metal", "P": 4, "C": 3, "R": 6, "S": 4, "Cn": 10, "draw": "Storms and wind 50%, wielder 50%", "bite": { "metal": 1.4 }, "sockets": 5, "flankChance": 0.1, "quirk": "Perfect conductor; high resonance, so feedback loops run hot" },
+    { "id": "cold-iron", "name": "Cold Iron", "family": "metal", "P": 6, "C": 6, "R": 4, "S": 8, "Cn": 3, "draw": "Wielder 70%, stillness 30%", "bite": { "ward": 2.0, "spirit": 1.4 }, "sockets": 3, "flankChance": 0, "quirk": "Shots break magic shields; poor conductor, best with 1-2 crystals" },
+    { "id": "silver", "name": "Silver", "family": "metal", "P": 5, "C": 5, "R": 5, "S": 6, "Cn": 8, "draw": "Moonlight 60%, wielder 40%", "bite": { "spirit": 1.6 }, "sockets": 4, "flankChance": 0.15, "quirk": "Twice as strong at night, half at noon" },
+    { "id": "gold", "name": "Gold", "family": "metal", "P": 4, "C": 10, "R": 2, "S": 7, "Cn": 7, "draw": "Sunlight 70%, stillness 30%", "bite": { "ward": 1.4 }, "sockets": 4, "flankChance": 0.1, "quirk": "Hoarder: huge reservoir, slow refill" },
+    { "id": "star-iron", "name": "Star-iron", "family": "metal", "P": 8, "C": 5, "R": 5, "S": 4, "Cn": 6, "draw": "Night sky 80%, wielder 20%", "bite": { "flesh": 1.1, "plant": 1.1, "stone": 1.1, "metal": 1.1, "spirit": 1.1, "ward": 1.1 }, "sockets": 4, "flankChance": 0.3, "quirk": "Meteoric; socket count random per wand (lab: 4), flank spots common" },
+    { "id": "quicksilver", "name": "Quicksilver Rod", "family": "metal", "P": 6, "C": 6, "R": 6, "S": 3, "Cn": 9, "draw": "Wielder 100%", "bite": { "flesh": 1.3 }, "sockets": 5, "flankChance": 0, "quirk": "Liquid metal in glass: crystals slosh; tilting while firing swaps two neighbors" },
+
+    { "id": "obsidian", "name": "Obsidian", "family": "stone", "P": 9, "C": 3, "R": 5, "S": 2, "Cn": 6, "draw": "Fire 40%, wielder 60%", "bite": { "flesh": 1.4 }, "sockets": 3, "flankChance": 0.05, "quirk": "Glass-sharp, brutal damage, cracks easily" },
+    { "id": "basalt", "name": "Basalt", "family": "stone", "P": 5, "C": 9, "R": 3, "S": 8, "Cn": 4, "draw": "Bare ground while still 80%, wielder 20%", "bite": { "stone": 1.4 }, "sockets": 4, "flankChance": 0.05, "quirk": "Roots you: +50% recharge standing still, nothing while moving" },
+    { "id": "lodestone", "name": "Lodestone", "family": "stone", "P": 5, "C": 5, "R": 5, "S": 6, "Cn": 5, "draw": "Ground 50%, wielder 50%", "bite": { "metal": 1.4 }, "sockets": 3, "flankChance": 0.1, "quirk": "Magnetic: shots curve toward armored targets" },
+    { "id": "chalk", "name": "Chalk", "family": "stone", "P": 2, "C": 4, "R": 8, "S": 2, "Cn": 5, "draw": "Wielder 100%", "bite": { "plant": 1.3 }, "sockets": 4, "flankChance": 0.2, "velocity": 1.0, "tempo": 1.0, "quirk": "Cheap starter; shots leave marks that later shots home in on" },
+    { "id": "geode", "name": "Geode", "family": "stone", "P": 5, "C": 6, "R": 4, "S": 6, "Cn": 6, "draw": "Ground 60%, wielder 40%", "bite": { "stone": 1.4 }, "sockets": 3, "flankChance": 0, "quirk": "Crack it open (permanent) to reveal a hidden inner socket that affects every crystal" },
+
+    { "id": "wolf-femur", "name": "Wolf Femur", "family": "bone", "P": 6, "C": 4, "R": 6, "S": 5, "Cn": 6, "draw": "Kills 40%, nearby allies 40%, wielder 20%", "bite": { "flesh": 1.4 }, "sockets": 4, "flankChance": 0.1, "quirk": "Pack: +15% recharge per ally or companion near you" },
+    { "id": "bird-hollowbone", "name": "Bird Hollowbone", "family": "bone", "P": 3, "C": 3, "R": 8, "S": 4, "Cn": 7, "draw": "Motion 60%, wind 40%", "bite": { "flyer": 1.6 }, "sockets": 4, "flankChance": 0.15, "velocity": 1.5, "quirk": "Fastest shots in the game" },
+    { "id": "whalebone", "name": "Whalebone", "family": "bone", "P": 5, "C": 8, "R": 5, "S": 7, "Cn": 7, "draw": "Water 70%, wielder 30%", "bite": { "flesh": 1.3 }, "sockets": 5, "flankChance": 0.1, "quirk": "Shots carry a deep pulse that knocks targets back" },
+    { "id": "antler", "name": "Antler", "family": "bone", "P": 5, "C": 5, "R": 6, "S": 6, "Cn": 6, "draw": "Season and growth 50%, wielder 50%", "bite": { "plant": 1.4 }, "sockets": 3, "flankChance": 0, "quirk": "Self-repairs; grows a new socket each in-game spring" },
+    { "id": "dragon-rib", "name": "Dragon Rib", "family": "bone", "P": 9, "C": 7, "R": 4, "S": 5, "Cn": 7, "draw": "Fire 50%, kills 30%, wielder 20%", "bite": { "flesh": 1.2, "plant": 1.2, "stone": 1.2, "metal": 1.2, "spirit": 1.2, "ward": 1.2 }, "sockets": 5, "flankChance": 0.2, "quirk": "Legendary; fire crystals in it count double" },
+    { "id": "saints-knuckle", "name": "Saint's Knuckle", "family": "bone", "P": 4, "C": 5, "R": 6, "S": 8, "Cn": 6, "draw": "Wielder's calm (stillness) 100%", "bite": { "spirit": 2.0 }, "sockets": 2, "flankChance": 0, "quirk": "Relic; harmful spells only on the dead and on wards" },
+
+    { "id": "clear-quartz", "name": "Clear Quartz", "family": "crystal", "P": 4, "C": 5, "R": 5, "S": 5, "Cn": 9, "draw": "Sunlight 50%, wielder 50%", "bite": { "ward": 1.4 }, "sockets": 5, "flankChance": 0.2, "quirk": "Every modifier crystal +20%" },
+    { "id": "amethyst", "name": "Amethyst", "family": "crystal", "P": 4, "C": 6, "R": 5, "S": 9, "Cn": 7, "draw": "Wielder 100%", "bite": { "spirit": 1.3 }, "sockets": 4, "flankChance": 0.15, "quirk": "Calm stone: backlash from overloads is halved" },
+    { "id": "prismglass", "name": "Prismglass", "family": "crystal", "P": 5, "C": 4, "R": 6, "S": 3, "Cn": 8, "draw": "Sunlight 80%, wielder 20%", "bite": { "flesh": 1.3 }, "sockets": 4, "flankChance": 0.25, "quirk": "Every shot also splits a weak copy off each side" },
+    { "id": "rime-crystal", "name": "Rime Crystal", "family": "crystal", "P": 6, "C": 5, "R": 7, "S": 4, "Cn": 8, "draw": "Cold 70%, wielder 30%", "bite": { "fireborn": 1.5 }, "sockets": 4, "flankChance": 0.15, "quirk": "Melts in heat: loses Stability near fire, freezes Water shots into ice" },
+    { "id": "rock-salt", "name": "Rock Salt", "family": "crystal", "P": 5, "C": 4, "R": 5, "S": 5, "Cn": 6, "draw": "Wielder 100%", "bite": { "spirit": 1.5 }, "sockets": 3, "flankChance": 0.1, "quirk": "Purifying; slowly dissolves if used in rain or with Water crystals" },
+
+    { "id": "living-coral", "name": "Living Coral", "family": "exotic", "P": 4, "C": 6, "R": 7, "S": 5, "Cn": 7, "draw": "Seawater 80%, wielder 20%", "bite": { "flesh": 1.3 }, "sockets": 3, "flankChance": 0, "quirk": "Alive: grows new sockets if kept in water; dies if left dry too long" },
+    { "id": "amber", "name": "Amber (with insect)", "family": "exotic", "P": 5, "C": 5, "R": 5, "S": 6, "Cn": 6, "draw": "Sunlight 50%, wielder 50%", "bite": { "plant": 1.3 }, "sockets": 4, "flankChance": 0.1, "quirk": "Memory: every 5th shot replays the previous shot for free" },
+    { "id": "nautilus", "name": "Nautilus Shell", "family": "exotic", "P": 5, "C": 5, "R": 5, "S": 4, "Cn": 7, "draw": "Water 50%, wielder 50%", "bite": { "flesh": 1.3 }, "sockets": 4, "flankChance": 0, "quirk": "Spiral spine: the last socket feeds back into the first (built-in loop)" },
+    { "id": "thornvine", "name": "Thornvine", "family": "exotic", "P": 8, "C": 5, "R": 9, "S": 4, "Cn": 6, "draw": "Wielder's blood 100%", "bite": { "flesh": 1.3 }, "sockets": 4, "flankChance": 0.15, "quirk": "Huge power and recharge, paid in your health" },
+    { "id": "fulgurite", "name": "Fulgurite", "family": "exotic", "P": 7, "C": 4, "R": 8, "S": 3, "Cn": 9, "draw": "Storms 90%, wielder 10%", "bite": { "metal": 1.4 }, "sockets": 4, "flankChance": 0.2, "quirk": "Lightning-made glass; only fully charges during storms" },
+    { "id": "dreamwood", "name": "Dreamwood", "family": "exotic", "P": 5, "C": 5, "R": 5, "S": 5, "Cn": 5, "draw": "Sleep and rest 100%", "bite": { "spirit": 1.3 }, "sockets": 4, "flankChance": 0.3, "quirk": "Shows a ghost preview of the next shot's shape before you fire" }
+  ]
+}

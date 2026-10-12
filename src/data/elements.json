@@ -1,0 +1,60 @@
+{
+  "_note": "Element crystals, their mood toward wand materials, and how they fuse. vs = damage multiplier by target category. Reactions are keyed core>coat (upstream crystal first).",
+  "elements": {
+    "fire": {
+      "name": "Fire", "color": "#ff6a2b", "form": "bolt",
+      "vs": { "plant": 1.5, "flesh": 1.2, "spirit": 1.0, "stone": 0.6, "fireborn": 0.0 },
+      "harmony": ["emberpine", "dragon-rib", "obsidian", "gold"],
+      "clash": ["willow", "whalebone", "rime-crystal", "living-coral"],
+      "byproduct": { "id": "steam-mist", "name": "Steam mist", "effect": "blind" },
+      "onHit": ["burn"]
+    },
+    "water": {
+      "name": "Water", "color": "#3b8cff", "form": "stream",
+      "vs": { "fireborn": 1.6, "stone": 1.3, "plant": 0.5 },
+      "harmony": ["willow", "whalebone", "living-coral", "silver"],
+      "clash": ["emberpine", "rock-salt", "chalk"],
+      "byproduct": { "id": "erosion", "name": "Erosion", "effect": "armorBreak" },
+      "onHit": ["soak", "knockback"]
+    },
+    "earth": {
+      "name": "Earth", "color": "#b08a4a", "form": "shard",
+      "vs": { "stone": 1.4, "metal": 1.4, "ward": 1.3, "flyer": 0.5, "spirit": 0.7 },
+      "harmony": ["basalt", "ironbark", "geode", "lodestone"],
+      "clash": ["hollowreed", "bird-hollowbone", "fulgurite"],
+      "byproduct": { "id": "dust", "name": "Dust", "effect": "blind" },
+      "onHit": ["armorBreak"]
+    },
+    "wind": {
+      "name": "Wind", "color": "#9fe8d6", "form": "gust",
+      "vs": { "flyer": 1.6, "spirit": 1.5, "metal": 0.7, "stone": 0.6 },
+      "harmony": ["hollowreed", "bird-hollowbone", "copper", "nautilus"],
+      "clash": ["basalt", "gold", "cold-iron"],
+      "byproduct": { "id": "howl", "name": "Howl", "effect": "fear" },
+      "onHit": ["pierce1"]
+    }
+  },
+  "reactions": {
+    "fire>fire":   { "id": "white-flame", "name": "White Flame", "tags": ["fire"], "color": "#fff4d6", "effects": ["burn", "ignoreFireResist"], "text": "Pure heat, ignores fire resistance" },
+    "fire>water":  { "id": "steam-bomb", "name": "Steam Bomb", "tags": ["fire", "water"], "color": "#e8eef5", "effects": ["aoe", "blind"], "text": "Bursts into a scalding, blinding cloud" },
+    "fire>earth":  { "id": "magma-shard", "name": "Magma Shard", "tags": ["fire", "earth"], "color": "#ff3b1f", "effects": ["burn", "zone"], "text": "Lands and pools as lava" },
+    "fire>wind":   { "id": "wildfire", "name": "Wildfire", "tags": ["fire", "wind"], "color": "#ffb02b", "effects": ["burn", "leap"], "text": "Flames that leap target to target" },
+    "water>fire":  { "id": "boiling-jet", "name": "Boiling Jet", "tags": ["water", "fire"], "color": "#9fd0ff", "effects": ["burn", "buffStrip"], "text": "Scalding stream, strips buffs" },
+    "water>water": { "id": "tidal-wave", "name": "Tidal Wave", "tags": ["water"], "color": "#1f6fff", "effects": ["knockback", "wide"], "text": "Wide, sweeping knockback" },
+    "water>earth": { "id": "mire", "name": "Mire", "tags": ["water", "earth"], "color": "#6b5a3a", "effects": ["root", "zone"], "text": "Mud pool that roots enemies" },
+    "water>wind":  { "id": "storm-bolt", "name": "Storm Bolt", "tags": ["water", "wind"], "color": "#b8a6ff", "effects": ["chain"], "text": "Lightning that chains between soaked foes" },
+    "earth>fire":  { "id": "volcanic-lob", "name": "Volcanic Lob", "tags": ["earth", "fire"], "color": "#d9481c", "effects": ["lob", "aoe", "burn"], "text": "Arcing rock that erupts" },
+    "earth>water": { "id": "quicksand", "name": "Quicksand", "tags": ["earth", "water"], "color": "#c9a86a", "effects": ["root"], "text": "Sinks and holds a target" },
+    "earth>earth": { "id": "tremor", "name": "Tremor", "tags": ["earth"], "color": "#8a6a3a", "effects": ["line", "armorBreak"], "text": "Ground shockwave in a line" },
+    "earth>wind":  { "id": "sandblast", "name": "Sandblast", "tags": ["earth", "wind"], "color": "#e0c27a", "effects": ["cone", "armorBreak", "blind"], "text": "Cone that strips armor and blinds" },
+    "wind>fire":   { "id": "firestorm", "name": "Firestorm", "tags": ["wind", "fire"], "color": "#ff8a3b", "effects": ["zone", "burn"], "text": "Spinning column of flame" },
+    "wind>water":  { "id": "hail", "name": "Hail", "tags": ["wind", "water"], "color": "#d6f2ff", "effects": ["spread", "slow"], "text": "Freezing shards in a spread" },
+    "wind>earth":  { "id": "dust-devil", "name": "Dust Devil", "tags": ["wind", "earth"], "color": "#c7b48a", "effects": ["zone", "pull"], "text": "Moving vortex that pulls in debris" },
+    "wind>wind":   { "id": "cyclone", "name": "Cyclone", "tags": ["wind"], "color": "#c8fff0", "effects": ["lift", "zone"], "text": "Tornado that lifts small enemies" }
+  },
+  "secondOrder": {
+    "steam-bomb>earth":  { "id": "geyser", "name": "Geyser", "tags": ["water", "earth", "fire"], "color": "#f0f8ff", "effects": ["aoe", "lift"], "text": "Eruptions from the ground at the impact point" },
+    "magma-shard>water": { "id": "obsidian-spikes", "name": "Obsidian Spikes", "tags": ["earth", "fire"], "color": "#2a1a2a", "effects": ["zone", "armorBreak"], "text": "Cooling lava hardens into a wall of spikes" },
+    "storm-bolt>fire":   { "id": "plasma", "name": "Plasma", "tags": ["fire", "wind", "water"], "color": "#ff7bff", "effects": ["armorBreak", "burn", "chain"], "text": "A short-range lance that melts metal armor" }
+  }
+}
