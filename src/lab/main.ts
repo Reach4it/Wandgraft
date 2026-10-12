@@ -1,5 +1,5 @@
 import './style.css';
-import { renderBench, wireBench } from './bench';
+import { mountBench, renderBench, wireBench } from './bench';
 import { renderSide, wireSide } from './side';
 import { onChange, state } from './state';
 import { World } from './world';
@@ -12,6 +12,8 @@ const labels = document.getElementById('labels')!;
 const world = new World(canvas, labels);
 
 let lastBuild = state.build;
+let lastEnv = state.env;
+mountBench(bench);
 
 function render() {
   // keep the bench scroll position across re-renders
@@ -23,6 +25,10 @@ function render() {
   if (state.build !== lastBuild) {
     lastBuild = state.build;
     world.onBuildChanged();
+  }
+  if (state.env !== lastEnv) {
+    lastEnv = state.env;
+    world.onEnvChanged();
   }
 }
 

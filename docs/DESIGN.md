@@ -36,7 +36,37 @@ The player's loop:
 3. Graft crystals into sockets. Order, adjacency and side (flank) sockets decide the output.
 4. Test-fire, watch what happens, rearrange. Discovery is the fun: the game never shows a full recipe list.
 
-A late-game layer fits the name: **grafting wand bodies**. A wand has three parts (grip, shaft, cap) and a master wandwright can join different materials, such as a silver cap on a yew shaft. The grip sets the draw source, the shaft sets sockets and conductivity, and the cap sets what the shot bites hardest.
+The name comes from **grafting wand bodies**. A wand has three parts (grip, shaft, cap) and any wandwright can join different materials, such as a silver cap on a yew shaft. The grip sets the draw source, the shaft sets sockets and conductivity, and the cap sets what the shot bites hardest.
+
+## Wand forms and what each part does
+
+A wand grows with its wizard: a beginner holds a bare twig with 2 crystals, and a master carries a grafted wand with 6 crystals or a staff with 7. The form decides which parts can be fitted and caps the sockets; the shaft material decides how many sockets it naturally has.
+
+| Form | Parts | Crystals (max) | Flanks | Notes |
+| --- | --- | --- | --- | --- |
+| Twig | Shaft only | 2 | None | Where everyone starts. ×0.85 power, slightly faster casts. Charge comes only from you. |
+| Wand | Grip + shaft | 3 | None | The grip decides where charge comes from. |
+| Grafted wand | Grip + shaft + cap | 4 | 1, if the shaft has room | The cap decides speed and what the shot bites. |
+| Master wand | Grip + shaft + cap | 6 | All the shaft allows | ×1.1 power. |
+| Staff | Grip + shaft + cap, two-handed | Shaft's sockets +2, up to 7 | All the shaft allows | ×1.25 power, slower casts, no off-hand ward. |
+
+Sockets on a given wand = the shaft's natural sockets (+2 for a staff), capped by the form. A 6-socket Hollowreed shaft still only takes 2 crystals as a twig.
+
+### What each part does
+
+Every material can be a grip, a shaft or a cap, and plays a different role in each slot.
+
+| Part | Decides | Example: Prismglass in this slot |
+| --- | --- | --- |
+| Grip | Where charge comes from (draw sources), capacity, recharge, and the wielder's side (backlash, steadiness) | Charges in bright sunlight |
+| Shaft | Sockets, flank chance, conductivity, stability, element harmony and clash; most material quirks | Fragile glass: −1 Heat limit |
+| Cap | Potency, shot speed, bite (what it hits hardest), and how the shot leaves the wand | Every shot splits a weak copy off each side |
+
+Stats blend across the parts, leaning on the part that owns them: Potency is 50% cap, Capacity and Recharge are 50% grip, Stability and Conductivity lean on the shaft. A missing part's share falls to the shaft.
+
+**Draw sources depend on conditions.** A grip's charge mix (for example Willow: rain and water 60%, you 30%, moonlight 10%) refills faster or slower with time of day, weather and whether you are moving. A Basalt grip barely charges while you run; a Silver cap hits 50% harder at night. The Wand Lab has day, night, rain and storm settings to test this.
+
+Every material's three roles are listed in the game data (src/data/materials.json) and shown on its part card in the Wand Lab.
 
 ## Base wand stats
 
@@ -152,7 +182,7 @@ Charge always flows handle to tip, so a crystal can only change what is upstream
 | Ring | A band around the shaft | Very rare | Touches every spine crystal at 30% strength |
 | Knot / Hidden | Random spot (Knotwood, Geode) | Material-specific | Doubles its crystal's effect, or affects the whole chain |
 
-**Socket count by wand size:** twig 2, wand 3–4, master wand 5–6, staff 7. Sockets beyond a material's natural count can be carved, but each carved socket costs 1 Stability.
+**Socket count by wand size:** twig 2, wand 3, grafted wand 4, master wand 6, staff 7 (see Wand forms). Sockets beyond a material's natural count can be carved, but each carved socket costs 1 Stability.
 
 ### Position roles along the spine
 
@@ -696,7 +726,7 @@ Each lesson teaches one rule, ends with a short dummy challenge, and pays a real
 
 | # | Lesson | Rule it teaches | Challenge | Reward |
 | --- | --- | --- | --- | --- |
-| 1 | A Stick and a Spark | Grip + shaft + cap make a wand; read the stat sheet | Graft three Chalk parts and hit the Straw Dummy | Your class wands |
+| 1 | A Stick and a Spark | Grip + shaft + cap make a wand; read the stat sheet | Socket a Fire crystal in a bare Chalk twig and hit the Straw Dummy | Your class wands |
 | 2 | The First Crystal | Element crystals and Bite | Break the Stone Sentinel's shell with the right element | 2 Clear element crystals |
 | 3 | Order Matters | Forward flow; before vs after a multiplier | Hit 3 dummies at once, then do it at half the drain | Twinspar |
 | 4 | When Elements Meet | Core and coat reactions | Make Steam, then Boiling Jet, from the same two crystals | Codex reaction page |

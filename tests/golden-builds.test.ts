@@ -3,16 +3,23 @@
 import { describe, expect, it } from 'vitest';
 import { resolveShot, damageMultiplier } from '../src/engine/resolve';
 import { preset } from '../src/engine/presets';
-import { WandBuild, wandStats } from '../src/engine/wand';
+import { WandBuild, drawReport, refit, wandStats } from '../src/engine/wand';
 import { makeRng, rollOverload } from '../src/engine/overload';
-import { MATERIALS, CRYSTALS, DUMMIES, PRESETS } from '../src/engine/data';
+import { MATERIALS, CRYSTALS, DUMMIES, PRESETS, FormId, material } from '../src/engine/data';
 
 const c = (id: string, quality = 'clear') => ({ id, quality });
 
-function wand(shaft: string, spine: (string | null)[], flanks: Record<number, string> = {}, grip = shaft, cap = shaft): WandBuild {
+function wand(
+  shaft: string,
+  spine: (string | null)[],
+  flanks: Record<number, string> = {},
+  grip: string | null = shaft,
+  cap: string | null = shaft,
+  form: FormId = 'master',
+): WandBuild {
   const f: WandBuild['flanks'] = {};
   for (const [k, v] of Object.entries(flanks)) f[Number(k)] = c(v);
-  return { grip, shaft, cap, spine: spine.map((s) => (s ? c(s) : null)), flanks: f };
+  return { form, grip, shaft, cap, spine: spine.map((s) => (s ? c(s) : null)), flanks: f };
 }
 
 describe('data', () => {
@@ -159,18 +166,77 @@ describe('targets', () => {
     expect(damageMultiplier(water, 'fireborn', ['fire'])).toBeGreaterThan(1);
   });
   it('a Cold Iron cap bites wards', () => {
-    expect(wandStats({ grip: 'chalk', shaft: 'chalk', cap: 'cold-iron' }).bite.ward).toBe(2);
+    expect(wandStats({ form: 'grafted', grip: 'chalk', shaft: 'chalk', cap: 'cold-iron' }).bite.ward).toBe(2);
   });
 });
 
 describe('overload', () => {
   it('rolls are repeatable with a seed', () => {
-    const a = rollOverload(3, makeRng(42), 'chalk');
-    const b = rollOverload(3, makeRng(42), 'chalk');
+    const a = rollOverload(3, makeRng(42));
+    const b = rollOverload(3, makeRng(42));
     expect(a).toEqual(b);
   });
   it('Emberpine never fizzles', () => {
     const rng = makeRng(7);
-    for (let i = 0; i < 200; i++) expect(rollOverload(2, rng, 'emberpine').kind).not.toBe('fizzle');
+    for (let i = 0; i < 200; i++) expect(rollOverload(2, rng, material('emberpine').shaft.effect).kind).not.toBe('fizzle');
+  });
+});
+
+describe('wand forms', () => {
+  it('a twig has no grip or cap and at most 2 sockets', () => {
+    const b = refit(wand('hollowreed', ['wind', 'swiftquartz', 'fire'], {}, 'copper', 'copper', 'twig'));
+    const st = wandStats(b);
+    expect(st.parts.grip).toBeNull();
+    expect(st.parts.cap).toBeNull();
+    expect(st.sockets).toBe(2);
+    expect(b.spine.length).toBe(2);
+  });
+  it('a twig draws charge only from the wielder', () => {
+    expect(wandStats(wand('willow', [], {}, null, null, 'twig')).drawMix).toEqual({ wielder: 1 });
+  });
+  it('a plain wand holds a grip but no cap, up to 3 sockets', () => {
+    const st = wandStats(wand('hollowreed', [], {}, 'willow', 'copper', 'wand'));
+    expect(st.parts.grip?.id).toBe('willow');
+    expect(st.parts.cap).toBeNull();
+    expect(st.sockets).toBe(3);
+  });
+  it('a grafted wand gets at most 1 flank; a master wand gets them all', () => {
+    expect(wandStats(wand('hollowreed', [], {}, 'willow', 'willow', 'grafted')).maxFlanks).toBe(1);
+    expect(wandStats(wand('hollowreed', [], {}, 'willow', 'willow', 'master')).maxFlanks).toBeGreaterThan(1);
+  });
+  it('a staff adds 2 sockets up to 7 and hits harder', () => {
+    expect(wandStats(wand('willow', [], {}, 'willow', 'willow', 'staff')).sockets).toBe(6);
+    expect(wandStats(wand('hollowreed', [], {}, 'willow', 'willow', 'staff')).sockets).toBe(7);
+    const staff = resolveShot(wand('willow', ['fire'], {}, 'willow', 'willow', 'staff'));
+    const master = resolveShot(wand('willow', ['fire'], {}, 'willow', 'willow', 'master'));
+    expect(staff.powerEach).toBeGreaterThan(master.powerEach);
+  });
+  it('every sample build fits its form', () => {
+    for (const p of PRESETS) {
+      const used = p.spine.filter(Boolean).length;
+      expect(used, p.id).toBeLessThanOrEqual(wandStats(preset(p.id)).sockets);
+    }
+  });
+});
+
+describe('what each part does', () => {
+  it('the same material does different things as grip, shaft and cap', () => {
+    // Prismglass as the cap splits side copies; as the shaft it does not
+    expect(resolveShot(wand('chalk', ['fire'], {}, 'chalk', 'prismglass')).sideCopies).toBe(2);
+    expect(resolveShot(wand('prismglass', ['fire'], {}, 'chalk', 'chalk')).sideCopies).toBe(0);
+  });
+  it('the cap decides bite', () => {
+    expect(wandStats({ form: 'grafted', grip: 'cold-iron', shaft: 'cold-iron', cap: 'chalk' }).bite.ward).toBeUndefined();
+  });
+  it('the grip decides where charge comes from', () => {
+    const st = wandStats({ form: 'grafted', grip: 'basalt', shaft: 'chalk', cap: 'chalk' });
+    expect(drawReport(st, { time: 'day', weather: 'clear' }, false).mult).toBeGreaterThan(drawReport(st, { time: 'day', weather: 'clear' }, true).mult);
+  });
+  it('a Silver cap is stronger at night', () => {
+    const b = wand('chalk', ['wind'], {}, 'chalk', 'silver');
+    expect(resolveShot(b, { time: 'night', weather: 'clear' }).powerEach).toBeGreaterThan(resolveShot(b, { time: 'day', weather: 'clear' }).powerEach);
+  });
+  it('a Rime cap freezes Water shots', () => {
+    expect(resolveShot(wand('chalk', ['water'], {}, 'chalk', 'rime-crystal')).effects).toContain('freeze');
   });
 });

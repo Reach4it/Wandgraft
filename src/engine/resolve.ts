@@ -5,6 +5,7 @@
 import {
   Crystal,
   ELEMENTS,
+  PartEffect,
   ElementId,
   REACTIONS,
   Reaction,
@@ -12,7 +13,7 @@ import {
   crystal as crystalDef,
   quality as qualityDef,
 } from './data';
-import { CrystalSlot, WandBuild, WandStats, wandStats } from './wand';
+import { CrystalSlot, DEFAULT_ENV, Env, WandBuild, WandStats, wandStats } from './wand';
 
 export type Form = 'bolt' | 'stream' | 'shard' | 'gust' | 'lob' | 'arcane';
 
@@ -53,6 +54,18 @@ export interface Shot {
   loops: number;
   drain: number;
   heat: number;
+  /** Extra chain jumps (Copper or Fulgurite cap). */
+  chainBonus: number;
+  /** Cap pulls shots toward armored targets (Lodestone). */
+  magnet: boolean;
+  /** Hits mark targets; later shots curve toward marks (Chalk). */
+  mark: boolean;
+  /** Shots curve gently toward the aim point (Willow cap). */
+  steer: boolean;
+  /** Every Nth shot fires twice (Amber cap); 0 = off. */
+  replayEvery: number;
+  /** Multiplier on overload backlash (Amethyst grip). */
+  backlashMult: number;
   /** Step-by-step log for the packet trace view. */
   trace: string[];
   /** Problems with the build (too many flanks, etc.). */
@@ -86,23 +99,26 @@ function pct(x: number) {
   return `${Math.round(x * 100)}%`;
 }
 
-export function resolveShot(build: WandBuild): Shot {
+export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
   const stats = wandStats(build);
   const shaftId = stats.parts.shaft.id;
+  const se = stats.shaftEffect;
+  const ce = stats.capEffect;
+  const ge = stats.gripEffect;
   const trace: string[] = [];
   const warnings: string[] = [];
 
   // ---------- 1. Draw / 2. Seed ----------
   trace.push(
-    `Seed: ${stats.parts.grip.name} grip, ${stats.parts.shaft.name} shaft, ${stats.parts.cap.name} cap. ` +
+    `Seed: ${stats.form.name}: ${stats.parts.grip ? `${stats.parts.grip.name} grip` : 'no grip'}, ${stats.parts.shaft.name} shaft, ${stats.parts.cap ? `${stats.parts.cap.name} cap` : 'no cap'}. ` +
       `Power ${stats.basePower}, Conductivity ${stats.conductivity} (boosts keep ${pct(stats.fadePerStep)} per step), Heat limit ${stats.heatLimit}.`,
   );
 
   // Build the ordered entry list from the spine (empty sockets are skipped).
   const slots = build.spine.slice(0, stats.sockets);
-  if (build.spine.length > stats.sockets) warnings.push(`Shaft has ${stats.sockets} sockets; extra crystals ignored.`);
+  if (build.spine.filter(Boolean).length > slots.filter(Boolean).length) warnings.push(`This ${stats.form.name.toLowerCase()} has ${stats.sockets} sockets; extra crystals ignored.`);
 
-  const entryAt: (Entry | null)[] = slots.map((slot, i) => (slot ? makeEntry(slot, i, shaftId) : null));
+  const entryAt: (Entry | null)[] = slots.map((slot, i) => (slot ? makeEntry(slot, i, se) : null));
   let entries: Entry[] = entryAt.filter((e): e is Entry => e !== null);
 
   // ---------- 3. Halo pass (flank sockets) ----------
@@ -114,16 +130,16 @@ export function resolveShot(build: WandBuild): Shot {
     const slot = build.flanks[gap];
     if (!slot) continue;
     if (gap < 0 || gap >= stats.sockets - 1) {
-      warnings.push(`Flank gap ${gap + 1} does not exist on this shaft.`);
+      warnings.push(`Flank ${gap + 1} does not exist on this wand.`);
       continue;
     }
     if (usedFlanks >= stats.maxFlanks) {
-      warnings.push(`${stats.parts.shaft.name} supports ${stats.maxFlanks} flank socket(s); extra flank ignored.`);
+      warnings.push(`This wand has room for ${stats.maxFlanks} flank crystal${stats.maxFlanks === 1 ? '' : 's'}; extra flank ignored.`);
       continue;
     }
     usedFlanks++;
     const def = crystalDef(slot.id);
-    const halo: Halo = { def, q: qualityDef(slot.quality).strength * modifierBonus(def, shaftId), gap };
+    const halo: Halo = { def, q: qualityDef(slot.quality).strength * modifierBonus(def, se), gap };
     const left = entryAt[gap];
     const right = entryAt[gap + 1];
     if (left) left.halos.push(halo);
@@ -206,7 +222,7 @@ export function resolveShot(build: WandBuild): Shot {
       }
     }
     if (fused) {
-      const bonus = catalyzed ? 1.5 : 1.25;
+      const bonus = (catalyzed ? 1.5 : 1.25) * (se.reactionBoost ?? 1);
       power *= bonus;
       current = fused;
       reactions.push(fused);
@@ -229,8 +245,9 @@ export function resolveShot(build: WandBuild): Shot {
     const q = e.q;
     const fade = fadeAt(i);
     const label = `S${e.spineIndex + 1} ${def.name}${e.qualityName !== 'Clear' ? ` (${e.qualityName})` : ''}`;
-    drain += def.drain * count;
+    drain += Math.max(0, def.drain - (se.drainReduce ?? 0)) * count;
     heat += def.heat;
+    if (def.element === 'fire' && se.fireHeat) heat += se.fireHeat;
 
     if (def.kind === 'element' && def.element) {
       const el = def.element;
@@ -243,8 +260,9 @@ export function resolveShot(build: WandBuild): Shot {
         byproducts.add(elDef.byproduct.name);
         effects.add(elDef.byproduct.effect);
       }
-      const dragon = shaftId === 'dragon-rib' && el === 'fire' ? 2 : 1;
-      const add = (def.power ?? 10) * q * mood * fade * dragon;
+      const dragon = se.fireDouble && el === 'fire' ? 2 : 1;
+      const boost = se.elementBoost?.[el] ?? 1;
+      const add = (def.power ?? 10) * q * mood * fade * dragon * boost;
       const prev = i > 0 ? entries[i - 1] : null;
       const adjacentPrev =
         !!lastElement &&
@@ -261,7 +279,7 @@ export function resolveShot(build: WandBuild): Shot {
           const tint = h.def.element;
           const r = current ? SECOND_ORDER[`${(current as Reaction).id}>${tint}`] ?? null : reactionFor(el, tint);
           if (r) {
-            power *= 1.25;
+            power *= 1.25 * (se.reactionBoost ?? 1);
             current = r;
             reactions.push(r);
             r.tags.forEach(addTag);
@@ -415,12 +433,16 @@ export function resolveShot(build: WandBuild): Shot {
   }
 
   // ---------- 5. Feedback pass ----------
-  if (shaftId === 'nautilus' && n > 0) {
+  if (se.spiral && n > 0) {
     loopsWanted += 1;
-    trace.push('Nautilus spiral: the tip feeds back into the root (+1 loop).');
+    trace.push(`${stats.parts.shaft.name} spiral: the tip feeds back into the root (+1 loop).`);
   }
   let loops = dampener ? Math.min(loopsWanted, 1) : loopsWanted;
-  const loopStrength = shaftId === 'copper' ? 0.5 : 0.4;
+  if (se.loopCap !== undefined && loops > se.loopCap) {
+    loops = se.loopCap;
+    trace.push(`${stats.parts.shaft.name} caps feedback at ${se.loopCap} loop.`);
+  }
+  const loopStrength = se.loopStrength ?? 0.4;
   if (loops > 0) {
     let extra = 0;
     for (let k = 1; k <= loops; k++) extra += Math.pow(loopStrength, k);
@@ -430,10 +452,45 @@ export function resolveShot(build: WandBuild): Shot {
     trace.push(`Feedback: ${loops} loop(s) at ${pct(loopStrength)}, power x${(1 + extra).toFixed(2)}, +${loopHeat} Heat.`);
   }
 
-  // Prismglass shaft: a weak copy splits off each side.
-  const sideCopies = shaftId === 'prismglass' ? 2 : 0;
+  // ---------- Form, shaft and cap finish the shot ----------
+  if (stats.form.powerMult !== 1) {
+    power *= stats.form.powerMult;
+    trace.push(`${stats.form.name}: power x${stats.form.powerMult}.`);
+  }
+  if (se.powerMult) {
+    power *= se.powerMult;
+    trace.push(`${stats.parts.shaft.name} shaft: power x${se.powerMult}.`);
+  }
+  const capName = stats.parts.cap ? `${stats.parts.cap.name} cap` : '';
+  if (ce.fireBoost && tags.includes('fire')) {
+    power *= ce.fireBoost;
+    trace.push(`${capName}: Fire shots x${ce.fireBoost}.`);
+  }
+  if (ce.nightPower) {
+    const m = env.time === 'night' ? 1.5 : 0.75;
+    power *= m;
+    trace.push(`${capName}: x${m} at ${env.time === 'night' ? 'night' : 'day'}.`);
+  }
+  if (ce.heavy) {
+    power *= 1.1;
+    size *= 1.3;
+    trace.push(`${capName}: heavier shot, x1.1 power.`);
+  }
+  if (ce.crit) critChance += ce.crit;
+  if (ce.pierceBonus) pierce += ce.pierceBonus;
+  if (ce.bounceBonus) bounces += ce.bounceBonus;
+  if (ce.seeds) seeds = Math.max(seeds, ce.seeds);
+  ce.addEffects?.forEach((x) => effects.add(x));
+  if (ce.freeze && tags.includes('water')) {
+    effects.add('root');
+    effects.add('freeze');
+    trace.push(`${capName}: Water freezes targets in place.`);
+  }
+  if (ge.steady) spreadDeg *= ge.steady;
+  const sideCopies = ce.sideCopies ?? 0;
 
   // ---------- 6. Heat (per-shot total; the overload check happens when firing) ----------
+  if (se.heatPerShot) heat += se.heatPerShot;
   heat = Math.max(0, heat);
   trace.push(`Heat: this shot adds ${heat} (limit ${stats.heatLimit}).`);
 
@@ -476,21 +533,27 @@ export function resolveShot(build: WandBuild): Shot {
     loops,
     drain: finalDrain,
     heat,
+    chainBonus: ce.chainBonus ?? 0,
+    magnet: !!ce.magnet,
+    mark: !!ce.mark,
+    steer: !!ce.steer,
+    replayEvery: ce.replay ?? 0,
+    backlashMult: ge.calm ?? 1,
     trace,
     warnings,
     stats,
   };
 }
 
-function modifierBonus(def: Crystal, shaftId: string): number {
-  return def.kind === 'modifier' && shaftId === 'clear-quartz' ? 1.2 : 1;
+function modifierBonus(def: Crystal, se: PartEffect): number {
+  return def.kind === 'modifier' ? se.modifierBoost ?? 1 : 1;
 }
 
-function makeEntry(slot: CrystalSlot, index: number, shaftId: string): Entry {
+function makeEntry(slot: CrystalSlot, index: number, se: PartEffect): Entry {
   const def = crystalDef(slot.id);
   const qd = qualityDef(slot.quality);
-  let q = qd.strength * modifierBonus(def, shaftId);
-  if (shaftId === 'knotwood' && index === 1) q *= 2; // the knot socket
+  let q = qd.strength * modifierBonus(def, se);
+  if (se.knot && index === 1) q *= 2; // the knot socket
   return { def, q, qualityName: qd.name, spineIndex: index, halos: [] };
 }
 

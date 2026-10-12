@@ -1,6 +1,6 @@
 // Right-hand panel: dummies on the range, sandbox controls and the damage log.
 import { DUMMIES } from '../engine/data';
-import { LabState, emit, state } from './state';
+import { LabState, emit, setEnv, state } from './state';
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
 
@@ -25,6 +25,16 @@ export function renderSide(root: HTMLElement, s: LabState) {
     <section class="block">
       <h2 class="block-title">Test dummies</h2>
       <div class="dummies">${dummies}</div>
+    </section>
+    <section class="block">
+      <h2 class="block-title">Time and weather</h2>
+      <p class="help">Grips charge from different sources: sun, moon, rain, storms. Try a Silver cap at night.</p>
+      <div class="seg" role="group" aria-label="Time of day">
+        ${(['day', 'night'] as const).map((t) => `<button class="q ${s.env.time === t ? 'on' : ''}" data-time="${t}" aria-pressed="${s.env.time === t}">${t === 'day' ? 'Day' : 'Night'}</button>`).join('')}
+      </div>
+      <div class="seg" role="group" aria-label="Weather">
+        ${(['clear', 'rain', 'storm'] as const).map((w) => `<button class="q ${s.env.weather === w ? 'on' : ''}" data-weather="${w}" aria-pressed="${s.env.weather === w}">${w[0].toUpperCase() + w.slice(1)}</button>`).join('')}
+      </div>
     </section>
     <section class="block">
       <h2 class="block-title">Sandbox</h2>
@@ -60,6 +70,8 @@ export function wireSide(root: HTMLElement, onReset: () => void) {
     const el = (e.target as HTMLElement).closest('button');
     if (!el) return;
     if (el.id === 'reset-range') onReset();
+    if (el.dataset.time) setEnv({ time: el.dataset.time as 'day' | 'night' });
+    if (el.dataset.weather) setEnv({ weather: el.dataset.weather as 'clear' | 'rain' | 'storm' });
     if (el.id === 'clear-log') {
       const log = root.querySelector('#log');
       if (log) log.innerHTML = '<li class="empty">Hits show up here: reaction, damage, and why.</li>';

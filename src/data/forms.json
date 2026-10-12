@@ -1,0 +1,10 @@
+{
+  "_note": "Wand forms, from a beginner's twig to a staff. A form decides which part slots exist and caps the spine sockets; the shaft material decides how many sockets it naturally has. sockets = min(shaft sockets + socketBonus, maxSockets).",
+  "forms": [
+    { "id": "twig", "name": "Twig", "parts": ["shaft"], "maxSockets": 2, "socketBonus": 0, "flanks": "none", "powerMult": 0.85, "tempoMult": 1.1, "twoHanded": false, "text": "A bare stick: shaft only, no grip or cap. Up to 2 crystals. Where every wandwright starts." },
+    { "id": "wand", "name": "Wand", "parts": ["grip", "shaft"], "maxSockets": 3, "socketBonus": 0, "flanks": "none", "powerMult": 1, "tempoMult": 1, "twoHanded": false, "text": "A grip is bound on. Up to 3 crystals; the grip sets where your charge comes from." },
+    { "id": "grafted", "name": "Grafted wand", "parts": ["grip", "shaft", "cap"], "maxSockets": 4, "socketBonus": 0, "flanks": "one", "powerMult": 1, "tempoMult": 1, "twoHanded": false, "text": "Grip, shaft and cap. Up to 4 crystals and 1 flank if the shaft has room." },
+    { "id": "master", "name": "Master wand", "parts": ["grip", "shaft", "cap"], "maxSockets": 6, "socketBonus": 0, "flanks": "full", "powerMult": 1.1, "tempoMult": 1, "twoHanded": false, "text": "A master's work. Up to 6 crystals and every flank the shaft can carry." },
+    { "id": "staff", "name": "Staff", "parts": ["grip", "shaft", "cap"], "maxSockets": 7, "socketBonus": 2, "flanks": "full", "powerMult": 1.25, "tempoMult": 0.8, "twoHanded": true, "text": "Two-handed: no off-hand ward. +2 sockets over the shaft (up to 7), +25% power, slower casts." }
+  ]
+}

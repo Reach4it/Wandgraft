@@ -1,52 +1,1354 @@
 {
-  "_note": "Wand body materials. P/C/R/S/Cn on a 1-10 scale (Potency, Capacity, Recharge, Stability, Conductivity). bite = damage multiplier by target category (missing = 1.0). sockets = spine sockets when used as a shaft; flankChance = chance a gap has a flank socket. velocity/tempo default to the family values in families.",
-  "families": {
-    "wood": { "velocity": 1.0, "tempo": 1.0 },
-    "metal": { "velocity": 1.1, "tempo": 0.95 },
-    "stone": { "velocity": 0.85, "tempo": 0.8 },
-    "bone": { "velocity": 1.05, "tempo": 1.05 },
-    "crystal": { "velocity": 1.0, "tempo": 1.0 },
-    "exotic": { "velocity": 1.0, "tempo": 1.0 }
+ "_note": "Wand body materials. P/C/R/S/Cn on a 1-10 scale (Potency, Capacity, Recharge, Stability, Conductivity). Each material can be a grip, shaft or cap and does something different in each: the grip sets draw sources (drawMix), capacity and recharge; the shaft sets sockets, flanks, conductivity, stability and element harmony; the cap sets potency, speed and bite. bite = damage multiplier by target category, applied when the material is the cap. grip/shaft/cap.effect keys are read by the engine and lab.",
+ "families": {
+  "wood": {
+   "velocity": 1.0,
+   "tempo": 1.0
   },
-  "materials": [
-    { "id": "willow", "name": "Willow", "family": "wood", "P": 4, "C": 5, "R": 7, "S": 6, "Cn": 8, "draw": "Rain and water 60%, wielder 30%, moon 10%", "bite": { "plant": 1.3, "flesh": 1.3 }, "sockets": 4, "flankChance": 0.15, "quirk": "Bends: shots curve slightly toward your aim drift, easy to steer" },
-    { "id": "ironbark", "name": "Ironbark Oak", "family": "wood", "P": 5, "C": 7, "R": 4, "S": 9, "Cn": 5, "draw": "Open ground 50%, wielder 50%", "bite": { "stone": 1.4 }, "sockets": 4, "flankChance": 0.05, "tempo": 0.85, "quirk": "Almost never overloads; slow tempo" },
-    { "id": "ashen-yew", "name": "Ashen Yew", "family": "wood", "P": 7, "C": 4, "R": 3, "S": 5, "Cn": 6, "draw": "Kills 70%, wielder 30%", "bite": { "spirit": 1.5 }, "sockets": 3, "flankChance": 0.1, "quirk": "Graveyard wood; each kill briefly doubles recharge" },
-    { "id": "emberpine", "name": "Emberpine", "family": "wood", "P": 6, "C": 4, "R": 6, "S": 3, "Cn": 6, "draw": "Fire nearby 50%, sun 30%, wielder 20%", "bite": { "plant": 1.3, "flesh": 1.3 }, "sockets": 3, "flankChance": 0.1, "quirk": "Resin ignites when overheated: overloads become fire bursts instead of misfires" },
-    { "id": "hollowreed", "name": "Hollowreed", "family": "wood", "P": 3, "C": 2, "R": 9, "S": 5, "Cn": 7, "draw": "Motion 60%, wind 40%", "bite": { "flesh": 1.3 }, "sockets": 6, "flankChance": 0.25, "tempo": 1.25, "quirk": "Many sockets, tiny reservoir; a fast, fiddly build wand" },
-    { "id": "knotwood", "name": "Knotwood", "family": "wood", "P": 5, "C": 5, "R": 5, "S": 4, "Cn": 5, "draw": "Wielder 100%", "bite": {}, "sockets": 4, "flankChance": 0, "quirk": "One random knot socket per wand that doubles its crystal's effect (lab: the 2nd socket is the knot)" },
-
-    { "id": "copper", "name": "Copper", "family": "metal", "P": 4, "C": 3, "R": 6, "S": 4, "Cn": 10, "draw": "Storms and wind 50%, wielder 50%", "bite": { "metal": 1.4 }, "sockets": 5, "flankChance": 0.1, "quirk": "Perfect conductor; high resonance, so feedback loops run hot" },
-    { "id": "cold-iron", "name": "Cold Iron", "family": "metal", "P": 6, "C": 6, "R": 4, "S": 8, "Cn": 3, "draw": "Wielder 70%, stillness 30%", "bite": { "ward": 2.0, "spirit": 1.4 }, "sockets": 3, "flankChance": 0, "quirk": "Shots break magic shields; poor conductor, best with 1-2 crystals" },
-    { "id": "silver", "name": "Silver", "family": "metal", "P": 5, "C": 5, "R": 5, "S": 6, "Cn": 8, "draw": "Moonlight 60%, wielder 40%", "bite": { "spirit": 1.6 }, "sockets": 4, "flankChance": 0.15, "quirk": "Twice as strong at night, half at noon" },
-    { "id": "gold", "name": "Gold", "family": "metal", "P": 4, "C": 10, "R": 2, "S": 7, "Cn": 7, "draw": "Sunlight 70%, stillness 30%", "bite": { "ward": 1.4 }, "sockets": 4, "flankChance": 0.1, "quirk": "Hoarder: huge reservoir, slow refill" },
-    { "id": "star-iron", "name": "Star-iron", "family": "metal", "P": 8, "C": 5, "R": 5, "S": 4, "Cn": 6, "draw": "Night sky 80%, wielder 20%", "bite": { "flesh": 1.1, "plant": 1.1, "stone": 1.1, "metal": 1.1, "spirit": 1.1, "ward": 1.1 }, "sockets": 4, "flankChance": 0.3, "quirk": "Meteoric; socket count random per wand (lab: 4), flank spots common" },
-    { "id": "quicksilver", "name": "Quicksilver Rod", "family": "metal", "P": 6, "C": 6, "R": 6, "S": 3, "Cn": 9, "draw": "Wielder 100%", "bite": { "flesh": 1.3 }, "sockets": 5, "flankChance": 0, "quirk": "Liquid metal in glass: crystals slosh; tilting while firing swaps two neighbors" },
-
-    { "id": "obsidian", "name": "Obsidian", "family": "stone", "P": 9, "C": 3, "R": 5, "S": 2, "Cn": 6, "draw": "Fire 40%, wielder 60%", "bite": { "flesh": 1.4 }, "sockets": 3, "flankChance": 0.05, "quirk": "Glass-sharp, brutal damage, cracks easily" },
-    { "id": "basalt", "name": "Basalt", "family": "stone", "P": 5, "C": 9, "R": 3, "S": 8, "Cn": 4, "draw": "Bare ground while still 80%, wielder 20%", "bite": { "stone": 1.4 }, "sockets": 4, "flankChance": 0.05, "quirk": "Roots you: +50% recharge standing still, nothing while moving" },
-    { "id": "lodestone", "name": "Lodestone", "family": "stone", "P": 5, "C": 5, "R": 5, "S": 6, "Cn": 5, "draw": "Ground 50%, wielder 50%", "bite": { "metal": 1.4 }, "sockets": 3, "flankChance": 0.1, "quirk": "Magnetic: shots curve toward armored targets" },
-    { "id": "chalk", "name": "Chalk", "family": "stone", "P": 2, "C": 4, "R": 8, "S": 2, "Cn": 5, "draw": "Wielder 100%", "bite": { "plant": 1.3 }, "sockets": 4, "flankChance": 0.2, "velocity": 1.0, "tempo": 1.0, "quirk": "Cheap starter; shots leave marks that later shots home in on" },
-    { "id": "geode", "name": "Geode", "family": "stone", "P": 5, "C": 6, "R": 4, "S": 6, "Cn": 6, "draw": "Ground 60%, wielder 40%", "bite": { "stone": 1.4 }, "sockets": 3, "flankChance": 0, "quirk": "Crack it open (permanent) to reveal a hidden inner socket that affects every crystal" },
-
-    { "id": "wolf-femur", "name": "Wolf Femur", "family": "bone", "P": 6, "C": 4, "R": 6, "S": 5, "Cn": 6, "draw": "Kills 40%, nearby allies 40%, wielder 20%", "bite": { "flesh": 1.4 }, "sockets": 4, "flankChance": 0.1, "quirk": "Pack: +15% recharge per ally or companion near you" },
-    { "id": "bird-hollowbone", "name": "Bird Hollowbone", "family": "bone", "P": 3, "C": 3, "R": 8, "S": 4, "Cn": 7, "draw": "Motion 60%, wind 40%", "bite": { "flyer": 1.6 }, "sockets": 4, "flankChance": 0.15, "velocity": 1.5, "quirk": "Fastest shots in the game" },
-    { "id": "whalebone", "name": "Whalebone", "family": "bone", "P": 5, "C": 8, "R": 5, "S": 7, "Cn": 7, "draw": "Water 70%, wielder 30%", "bite": { "flesh": 1.3 }, "sockets": 5, "flankChance": 0.1, "quirk": "Shots carry a deep pulse that knocks targets back" },
-    { "id": "antler", "name": "Antler", "family": "bone", "P": 5, "C": 5, "R": 6, "S": 6, "Cn": 6, "draw": "Season and growth 50%, wielder 50%", "bite": { "plant": 1.4 }, "sockets": 3, "flankChance": 0, "quirk": "Self-repairs; grows a new socket each in-game spring" },
-    { "id": "dragon-rib", "name": "Dragon Rib", "family": "bone", "P": 9, "C": 7, "R": 4, "S": 5, "Cn": 7, "draw": "Fire 50%, kills 30%, wielder 20%", "bite": { "flesh": 1.2, "plant": 1.2, "stone": 1.2, "metal": 1.2, "spirit": 1.2, "ward": 1.2 }, "sockets": 5, "flankChance": 0.2, "quirk": "Legendary; fire crystals in it count double" },
-    { "id": "saints-knuckle", "name": "Saint's Knuckle", "family": "bone", "P": 4, "C": 5, "R": 6, "S": 8, "Cn": 6, "draw": "Wielder's calm (stillness) 100%", "bite": { "spirit": 2.0 }, "sockets": 2, "flankChance": 0, "quirk": "Relic; harmful spells only on the dead and on wards" },
-
-    { "id": "clear-quartz", "name": "Clear Quartz", "family": "crystal", "P": 4, "C": 5, "R": 5, "S": 5, "Cn": 9, "draw": "Sunlight 50%, wielder 50%", "bite": { "ward": 1.4 }, "sockets": 5, "flankChance": 0.2, "quirk": "Every modifier crystal +20%" },
-    { "id": "amethyst", "name": "Amethyst", "family": "crystal", "P": 4, "C": 6, "R": 5, "S": 9, "Cn": 7, "draw": "Wielder 100%", "bite": { "spirit": 1.3 }, "sockets": 4, "flankChance": 0.15, "quirk": "Calm stone: backlash from overloads is halved" },
-    { "id": "prismglass", "name": "Prismglass", "family": "crystal", "P": 5, "C": 4, "R": 6, "S": 3, "Cn": 8, "draw": "Sunlight 80%, wielder 20%", "bite": { "flesh": 1.3 }, "sockets": 4, "flankChance": 0.25, "quirk": "Every shot also splits a weak copy off each side" },
-    { "id": "rime-crystal", "name": "Rime Crystal", "family": "crystal", "P": 6, "C": 5, "R": 7, "S": 4, "Cn": 8, "draw": "Cold 70%, wielder 30%", "bite": { "fireborn": 1.5 }, "sockets": 4, "flankChance": 0.15, "quirk": "Melts in heat: loses Stability near fire, freezes Water shots into ice" },
-    { "id": "rock-salt", "name": "Rock Salt", "family": "crystal", "P": 5, "C": 4, "R": 5, "S": 5, "Cn": 6, "draw": "Wielder 100%", "bite": { "spirit": 1.5 }, "sockets": 3, "flankChance": 0.1, "quirk": "Purifying; slowly dissolves if used in rain or with Water crystals" },
-
-    { "id": "living-coral", "name": "Living Coral", "family": "exotic", "P": 4, "C": 6, "R": 7, "S": 5, "Cn": 7, "draw": "Seawater 80%, wielder 20%", "bite": { "flesh": 1.3 }, "sockets": 3, "flankChance": 0, "quirk": "Alive: grows new sockets if kept in water; dies if left dry too long" },
-    { "id": "amber", "name": "Amber (with insect)", "family": "exotic", "P": 5, "C": 5, "R": 5, "S": 6, "Cn": 6, "draw": "Sunlight 50%, wielder 50%", "bite": { "plant": 1.3 }, "sockets": 4, "flankChance": 0.1, "quirk": "Memory: every 5th shot replays the previous shot for free" },
-    { "id": "nautilus", "name": "Nautilus Shell", "family": "exotic", "P": 5, "C": 5, "R": 5, "S": 4, "Cn": 7, "draw": "Water 50%, wielder 50%", "bite": { "flesh": 1.3 }, "sockets": 4, "flankChance": 0, "quirk": "Spiral spine: the last socket feeds back into the first (built-in loop)" },
-    { "id": "thornvine", "name": "Thornvine", "family": "exotic", "P": 8, "C": 5, "R": 9, "S": 4, "Cn": 6, "draw": "Wielder's blood 100%", "bite": { "flesh": 1.3 }, "sockets": 4, "flankChance": 0.15, "quirk": "Huge power and recharge, paid in your health" },
-    { "id": "fulgurite", "name": "Fulgurite", "family": "exotic", "P": 7, "C": 4, "R": 8, "S": 3, "Cn": 9, "draw": "Storms 90%, wielder 10%", "bite": { "metal": 1.4 }, "sockets": 4, "flankChance": 0.2, "quirk": "Lightning-made glass; only fully charges during storms" },
-    { "id": "dreamwood", "name": "Dreamwood", "family": "exotic", "P": 5, "C": 5, "R": 5, "S": 5, "Cn": 5, "draw": "Sleep and rest 100%", "bite": { "spirit": 1.3 }, "sockets": 4, "flankChance": 0.3, "quirk": "Shows a ghost preview of the next shot's shape before you fire" }
-  ]
+  "metal": {
+   "velocity": 1.1,
+   "tempo": 0.95
+  },
+  "stone": {
+   "velocity": 0.85,
+   "tempo": 0.8
+  },
+  "bone": {
+   "velocity": 1.05,
+   "tempo": 1.05
+  },
+  "crystal": {
+   "velocity": 1.0,
+   "tempo": 1.0
+  },
+  "exotic": {
+   "velocity": 1.0,
+   "tempo": 1.0
+  }
+ },
+ "materials": [
+  {
+   "id": "willow",
+   "name": "Willow",
+   "family": "wood",
+   "P": 4,
+   "C": 5,
+   "R": 7,
+   "S": 6,
+   "Cn": 8,
+   "draw": "Rain and water 60%, wielder 30%, moon 10%",
+   "bite": {
+    "plant": 1.3,
+    "flesh": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0.15,
+   "color": "#b9b27a",
+   "drawMix": {
+    "water": 0.6,
+    "wielder": 0.3,
+    "moon": 0.1
+   },
+   "grip": {
+    "perk": "Steady in the hand: shots spread 30% less.",
+    "effect": {
+     "steady": 0.7
+    }
+   },
+   "shaft": {
+    "perk": "Supple channel: Water crystals +15%.",
+    "effect": {
+     "elementBoost": {
+      "water": 1.15
+     }
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Bends: shots curve gently toward where you aim.",
+    "effect": {
+     "steer": 1
+    }
+   }
+  },
+  {
+   "id": "ironbark",
+   "name": "Ironbark Oak",
+   "family": "wood",
+   "P": 5,
+   "C": 7,
+   "R": 4,
+   "S": 9,
+   "Cn": 5,
+   "draw": "Open ground 50%, wielder 50%",
+   "bite": {
+    "stone": 1.4
+   },
+   "sockets": 4,
+   "flankChance": 0.05,
+   "tempo": 0.85,
+   "color": "#5b4a3c",
+   "drawMix": {
+    "ground": 0.5,
+    "wielder": 0.5
+   },
+   "grip": {
+    "perk": "Solid grip: +20% capacity.",
+    "effect": {
+     "capacity": 1.2
+    }
+   },
+   "shaft": {
+    "perk": "Almost never overloads: +2 Heat limit.",
+    "effect": {
+     "heatLimit": 2
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Blunt knob: hits knock targets back.",
+    "effect": {
+     "addEffects": [
+      "knockback"
+     ]
+    }
+   }
+  },
+  {
+   "id": "ashen-yew",
+   "name": "Ashen Yew",
+   "family": "wood",
+   "P": 7,
+   "C": 4,
+   "R": 3,
+   "S": 5,
+   "Cn": 6,
+   "draw": "Kills 70%, wielder 30%",
+   "bite": {
+    "spirit": 1.5
+   },
+   "sockets": 3,
+   "flankChance": 0.1,
+   "color": "#9c9a92",
+   "drawMix": {
+    "kills": 0.7,
+    "wielder": 0.3
+   },
+   "grip": {
+    "perk": "Graveyard wood: each kill refills a burst of charge.",
+    "effect": {
+     "killRefill": 0.5
+    }
+   },
+   "shaft": {
+    "perk": "Kill-hungry: each kill cools 3 Heat.",
+    "effect": {
+     "killCool": 3
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Bites the dead: Spirit and undead take 50% more.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "emberpine",
+   "name": "Emberpine",
+   "family": "wood",
+   "P": 6,
+   "C": 4,
+   "R": 6,
+   "S": 3,
+   "Cn": 6,
+   "draw": "Fire nearby 50%, sun 30%, wielder 20%",
+   "bite": {
+    "plant": 1.3,
+    "flesh": 1.3
+   },
+   "sockets": 3,
+   "flankChance": 0.1,
+   "color": "#a2482a",
+   "drawMix": {
+    "fire": 0.5,
+    "sun": 0.3,
+    "wielder": 0.2
+   },
+   "grip": {
+    "perk": "Warm resin: charges near fire and in sunlight.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Resin ignites when overheated: overloads become fire bursts instead of misfires.",
+    "effect": {
+     "overload": "fireBurst"
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Smoldering tip: every hit sets the target burning.",
+    "effect": {
+     "addEffects": [
+      "burn"
+     ]
+    }
+   }
+  },
+  {
+   "id": "hollowreed",
+   "name": "Hollowreed",
+   "family": "wood",
+   "P": 3,
+   "C": 2,
+   "R": 9,
+   "S": 5,
+   "Cn": 7,
+   "draw": "Motion 60%, wind 40%",
+   "bite": {
+    "flesh": 1.3
+   },
+   "sockets": 6,
+   "flankChance": 0.25,
+   "tempo": 1.25,
+   "color": "#cdbb78",
+   "drawMix": {
+    "motion": 0.6,
+    "wind": 0.4
+   },
+   "grip": {
+    "perk": "Light: charges while you move.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Many sockets (6), tiny reservoir: a fast, fiddly build wand.",
+    "effect": {},
+    "lab": true
+   },
+   "cap": {
+    "perk": "Whistling tip: +20% shot speed.",
+    "effect": {
+     "speed": 1.2
+    }
+   }
+  },
+  {
+   "id": "knotwood",
+   "name": "Knotwood",
+   "family": "wood",
+   "P": 5,
+   "C": 5,
+   "R": 5,
+   "S": 4,
+   "Cn": 5,
+   "draw": "Wielder 100%",
+   "bite": {},
+   "sockets": 4,
+   "flankChance": 0,
+   "color": "#6e5232",
+   "drawMix": {
+    "wielder": 1
+   },
+   "grip": {
+    "perk": "Plain wood: charges only from you.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "The knot: the 2nd socket doubles its crystal's effect.",
+    "effect": {
+     "knot": 1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Plain tip.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "copper",
+   "name": "Copper",
+   "family": "metal",
+   "P": 4,
+   "C": 3,
+   "R": 6,
+   "S": 4,
+   "Cn": 10,
+   "draw": "Storms and wind 50%, wielder 50%",
+   "bite": {
+    "metal": 1.4
+   },
+   "sockets": 5,
+   "flankChance": 0.1,
+   "color": "#b87333",
+   "drawMix": {
+    "storm": 0.5,
+    "wielder": 0.5
+   },
+   "grip": {
+    "perk": "Conducts the sky: charges fast in storms.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Perfect conductor; feedback loops run at 50% instead of 40%.",
+    "effect": {
+     "loopStrength": 0.5
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Conductive tip: chains jump 1 more time; hits metal 40% harder.",
+    "effect": {
+     "chainBonus": 1
+    }
+   }
+  },
+  {
+   "id": "cold-iron",
+   "name": "Cold Iron",
+   "family": "metal",
+   "P": 6,
+   "C": 6,
+   "R": 4,
+   "S": 8,
+   "Cn": 3,
+   "draw": "Wielder 70%, stillness 30%",
+   "bite": {
+    "ward": 2.0,
+    "spirit": 1.4
+   },
+   "sockets": 3,
+   "flankChance": 0,
+   "color": "#4f565e",
+   "drawMix": {
+    "wielder": 0.7,
+    "still": 0.3
+   },
+   "grip": {
+    "perk": "Cold weight: charges from you, faster when still.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Poor conductor that resists magic: feedback loops capped at 1.",
+    "effect": {
+     "loopCap": 1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Ward-breaker: double damage to magic wards.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "silver",
+   "name": "Silver",
+   "family": "metal",
+   "P": 5,
+   "C": 5,
+   "R": 5,
+   "S": 6,
+   "Cn": 8,
+   "draw": "Moonlight 60%, wielder 40%",
+   "bite": {
+    "spirit": 1.6
+   },
+   "sockets": 4,
+   "flankChance": 0.15,
+   "color": "#c9ced6",
+   "drawMix": {
+    "moon": 0.6,
+    "wielder": 0.4
+   },
+   "grip": {
+    "perk": "Moon-drawn: charges best at night.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Silvered channel: Water and Wind crystals +10%.",
+    "effect": {
+     "elementBoost": {
+      "water": 1.1,
+      "wind": 1.1
+     }
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Moon tip: +50% power at night, −25% by day. Bites the undead.",
+    "effect": {
+     "nightPower": 1
+    }
+   }
+  },
+  {
+   "id": "gold",
+   "name": "Gold",
+   "family": "metal",
+   "P": 4,
+   "C": 10,
+   "R": 2,
+   "S": 7,
+   "Cn": 7,
+   "draw": "Sunlight 70%, stillness 30%",
+   "bite": {
+    "ward": 1.4
+   },
+   "sockets": 4,
+   "flankChance": 0.1,
+   "color": "#d4af37",
+   "drawMix": {
+    "sun": 0.7,
+    "still": 0.3
+   },
+   "grip": {
+    "perk": "Hoarder: +50% capacity, slow refill.",
+    "effect": {
+     "capacity": 1.5
+    }
+   },
+   "shaft": {
+    "perk": "Heavy channel: −10% tempo.",
+    "effect": {
+     "tempo": 0.9
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Gilded tip: wards take 40% more.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "star-iron",
+   "name": "Star-iron",
+   "family": "metal",
+   "P": 8,
+   "C": 5,
+   "R": 5,
+   "S": 4,
+   "Cn": 6,
+   "draw": "Night sky 80%, wielder 20%",
+   "bite": {
+    "flesh": 1.1,
+    "plant": 1.1,
+    "stone": 1.1,
+    "metal": 1.1,
+    "spirit": 1.1,
+    "ward": 1.1
+   },
+   "sockets": 4,
+   "flankChance": 0.3,
+   "color": "#3c4352",
+   "drawMix": {
+    "sky": 0.8,
+    "wielder": 0.2
+   },
+   "grip": {
+    "perk": "Fallen star: charges under the night sky.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Meteoric: flank sockets are common (30% per gap).",
+    "effect": {},
+    "lab": true
+   },
+   "cap": {
+    "perk": "Star tip: +10% against everything.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "quicksilver",
+   "name": "Quicksilver Rod",
+   "family": "metal",
+   "P": 6,
+   "C": 6,
+   "R": 6,
+   "S": 3,
+   "Cn": 9,
+   "draw": "Wielder 100%",
+   "bite": {
+    "flesh": 1.3
+   },
+   "sockets": 5,
+   "flankChance": 0,
+   "color": "#b4bdc6",
+   "drawMix": {
+    "wielder": 1
+   },
+   "grip": {
+    "perk": "Cold, heavy liquid: charges only from you.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Liquid metal: crystals slosh when you tilt (not in the lab yet).",
+    "effect": {},
+    "lab": false
+   },
+   "cap": {
+    "perk": "Slick tip: shots pierce 1 more target.",
+    "effect": {
+     "pierceBonus": 1
+    }
+   }
+  },
+  {
+   "id": "obsidian",
+   "name": "Obsidian",
+   "family": "stone",
+   "P": 9,
+   "C": 3,
+   "R": 5,
+   "S": 2,
+   "Cn": 6,
+   "draw": "Fire 40%, wielder 60%",
+   "bite": {
+    "flesh": 1.4
+   },
+   "sockets": 3,
+   "flankChance": 0.05,
+   "color": "#1f1a24",
+   "drawMix": {
+    "fire": 0.4,
+    "wielder": 0.6
+   },
+   "grip": {
+    "perk": "Sharp grip: charges near fire.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Brittle glass: every overload also cracks the wand.",
+    "effect": {
+     "overload": "alsoCrack"
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Glass edge: +15% critical chance.",
+    "effect": {
+     "crit": 0.15
+    }
+   }
+  },
+  {
+   "id": "basalt",
+   "name": "Basalt",
+   "family": "stone",
+   "P": 5,
+   "C": 9,
+   "R": 3,
+   "S": 8,
+   "Cn": 4,
+   "draw": "Bare ground while still 80%, wielder 20%",
+   "bite": {
+    "stone": 1.4
+   },
+   "sockets": 4,
+   "flankChance": 0.05,
+   "color": "#3d3d42",
+   "drawMix": {
+    "still": 0.8,
+    "wielder": 0.2
+   },
+   "grip": {
+    "perk": "Roots you: fast recharge standing still, almost none while moving.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Dense channel: +1 Heat limit.",
+    "effect": {
+     "heatLimit": 1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Heavy tip: shots are 30% bigger, 20% slower, 10% stronger.",
+    "effect": {
+     "heavy": 1
+    }
+   }
+  },
+  {
+   "id": "lodestone",
+   "name": "Lodestone",
+   "family": "stone",
+   "P": 5,
+   "C": 5,
+   "R": 5,
+   "S": 6,
+   "Cn": 5,
+   "draw": "Ground 50%, wielder 50%",
+   "bite": {
+    "metal": 1.4
+   },
+   "sockets": 3,
+   "flankChance": 0.1,
+   "color": "#4b4148",
+   "drawMix": {
+    "ground": 0.5,
+    "wielder": 0.5
+   },
+   "grip": {
+    "perk": "Grounded: charges steadily from the earth.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Magnetic channel: Earth crystals +15%.",
+    "effect": {
+     "elementBoost": {
+      "earth": 1.15
+     }
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Magnetic tip: shots curve toward armored targets.",
+    "effect": {
+     "magnet": 1
+    }
+   }
+  },
+  {
+   "id": "chalk",
+   "name": "Chalk",
+   "family": "stone",
+   "P": 2,
+   "C": 4,
+   "R": 8,
+   "S": 2,
+   "Cn": 5,
+   "draw": "Wielder 100%",
+   "bite": {
+    "plant": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0.2,
+   "velocity": 1.0,
+   "tempo": 1.0,
+   "color": "#e6e1d3",
+   "drawMix": {
+    "wielder": 1
+   },
+   "grip": {
+    "perk": "Starter grip: charges only from you.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Soft and easy to carve: every crystal costs 1 less charge.",
+    "effect": {
+     "drainReduce": 1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Marking tip: hits chalk-mark the target; later shots curve toward marks.",
+    "effect": {
+     "mark": 1
+    }
+   }
+  },
+  {
+   "id": "geode",
+   "name": "Geode",
+   "family": "stone",
+   "P": 5,
+   "C": 6,
+   "R": 4,
+   "S": 6,
+   "Cn": 6,
+   "draw": "Ground 60%, wielder 40%",
+   "bite": {
+    "stone": 1.4
+   },
+   "sockets": 3,
+   "flankChance": 0,
+   "color": "#8b7c9c",
+   "drawMix": {
+    "ground": 0.6,
+    "wielder": 0.4
+   },
+   "grip": {
+    "perk": "Earth-hollow: charges from the ground.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Crack it open to reveal a hidden inner socket (not in the lab yet).",
+    "effect": {},
+    "lab": false
+   },
+   "cap": {
+    "perk": "Crystal-lined tip: stone takes 40% more.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "wolf-femur",
+   "name": "Wolf Femur",
+   "family": "bone",
+   "P": 6,
+   "C": 4,
+   "R": 6,
+   "S": 5,
+   "Cn": 6,
+   "draw": "Kills 40%, nearby allies 40%, wielder 20%",
+   "bite": {
+    "flesh": 1.4
+   },
+   "sockets": 4,
+   "flankChance": 0.1,
+   "color": "#e4d9c0",
+   "drawMix": {
+    "kills": 0.4,
+    "allies": 0.4,
+    "wielder": 0.2
+   },
+   "grip": {
+    "perk": "Pack: +15% recharge per ally nearby (no allies in the lab); kills refill charge.",
+    "effect": {
+     "killRefill": 0.3
+    }
+   },
+   "shaft": {
+    "perk": "Hunter's bone: Fire and Earth crystals +10%.",
+    "effect": {
+     "elementBoost": {
+      "fire": 1.1,
+      "earth": 1.1
+     }
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Fang tip: +10% critical chance.",
+    "effect": {
+     "crit": 0.1
+    }
+   }
+  },
+  {
+   "id": "bird-hollowbone",
+   "name": "Bird Hollowbone",
+   "family": "bone",
+   "P": 3,
+   "C": 3,
+   "R": 8,
+   "S": 4,
+   "Cn": 7,
+   "draw": "Motion 60%, wind 40%",
+   "bite": {
+    "flyer": 1.6
+   },
+   "sockets": 4,
+   "flankChance": 0.15,
+   "velocity": 1.5,
+   "color": "#f1ead6",
+   "drawMix": {
+    "motion": 0.6,
+    "wind": 0.4
+   },
+   "grip": {
+    "perk": "Light as a feather: charges while you move.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Hollow channel: Wind crystals +15%.",
+    "effect": {
+     "elementBoost": {
+      "wind": 1.15
+     }
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Featherlight tip: the fastest shots in the game.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "whalebone",
+   "name": "Whalebone",
+   "family": "bone",
+   "P": 5,
+   "C": 8,
+   "R": 5,
+   "S": 7,
+   "Cn": 7,
+   "draw": "Water 70%, wielder 30%",
+   "bite": {
+    "flesh": 1.3
+   },
+   "sockets": 5,
+   "flankChance": 0.1,
+   "color": "#dad1bb",
+   "drawMix": {
+    "water": 0.7,
+    "wielder": 0.3
+   },
+   "grip": {
+    "perk": "Sea-born: charges in rain.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Deep channel: Water crystals +15%.",
+    "effect": {
+     "elementBoost": {
+      "water": 1.15
+     }
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Deep pulse: hits knock targets back.",
+    "effect": {
+     "addEffects": [
+      "knockback"
+     ]
+    }
+   }
+  },
+  {
+   "id": "antler",
+   "name": "Antler",
+   "family": "bone",
+   "P": 5,
+   "C": 5,
+   "R": 6,
+   "S": 6,
+   "Cn": 6,
+   "draw": "Season and growth 50%, wielder 50%",
+   "bite": {
+    "plant": 1.4
+   },
+   "sockets": 3,
+   "flankChance": 0,
+   "color": "#b59870",
+   "drawMix": {
+    "growth": 0.5,
+    "wielder": 0.5
+   },
+   "grip": {
+    "perk": "Living bone: charges from growing things, best in rain.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Grows a new socket each in-game spring (not in the lab yet).",
+    "effect": {},
+    "lab": false
+   },
+   "cap": {
+    "perk": "Branching tip: hits split into 2 small shards.",
+    "effect": {
+     "seeds": 2
+    }
+   }
+  },
+  {
+   "id": "dragon-rib",
+   "name": "Dragon Rib",
+   "family": "bone",
+   "P": 9,
+   "C": 7,
+   "R": 4,
+   "S": 5,
+   "Cn": 7,
+   "draw": "Fire 50%, kills 30%, wielder 20%",
+   "bite": {
+    "flesh": 1.2,
+    "plant": 1.2,
+    "stone": 1.2,
+    "metal": 1.2,
+    "spirit": 1.2,
+    "ward": 1.2
+   },
+   "sockets": 5,
+   "flankChance": 0.2,
+   "color": "#9b3424",
+   "drawMix": {
+    "fire": 0.5,
+    "kills": 0.3,
+    "wielder": 0.2
+   },
+   "grip": {
+    "perk": "Dragon's hold: kills refill charge.",
+    "effect": {
+     "killRefill": 0.4
+    }
+   },
+   "shaft": {
+    "perk": "Fire crystals in it count double.",
+    "effect": {
+     "fireDouble": 1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Dragon's mouth: +20% against everything, Fire shots +20%.",
+    "effect": {
+     "fireBoost": 1.2
+    }
+   }
+  },
+  {
+   "id": "saints-knuckle",
+   "name": "Saint's Knuckle",
+   "family": "bone",
+   "P": 4,
+   "C": 5,
+   "R": 6,
+   "S": 8,
+   "Cn": 6,
+   "draw": "Wielder's calm (stillness) 100%",
+   "bite": {
+    "spirit": 2.0
+   },
+   "sockets": 2,
+   "flankChance": 0,
+   "color": "#e6d69e",
+   "drawMix": {
+    "calm": 1
+   },
+   "grip": {
+    "perk": "Calm relic: charges only while you stand still.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Holy relic: −1 Heat per shot.",
+    "effect": {
+     "heatPerShot": -1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Relic tip: Spirit and undead take double.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "clear-quartz",
+   "name": "Clear Quartz",
+   "family": "crystal",
+   "P": 4,
+   "C": 5,
+   "R": 5,
+   "S": 5,
+   "Cn": 9,
+   "draw": "Sunlight 50%, wielder 50%",
+   "bite": {
+    "ward": 1.4
+   },
+   "sockets": 5,
+   "flankChance": 0.2,
+   "color": "#e3ecff",
+   "drawMix": {
+    "sun": 0.5,
+    "wielder": 0.5
+   },
+   "grip": {
+    "perk": "Sun-clear: charges in daylight.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Every modifier crystal +20%.",
+    "effect": {
+     "modifierBoost": 1.2
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Clear tip: wards take 40% more.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "amethyst",
+   "name": "Amethyst",
+   "family": "crystal",
+   "P": 4,
+   "C": 6,
+   "R": 5,
+   "S": 9,
+   "Cn": 7,
+   "draw": "Wielder 100%",
+   "bite": {
+    "spirit": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0.15,
+   "color": "#9a6bd4",
+   "drawMix": {
+    "wielder": 1
+   },
+   "grip": {
+    "perk": "Calm stone: overload backlash is halved.",
+    "effect": {
+     "calm": 0.5
+    }
+   },
+   "shaft": {
+    "perk": "Calm channel: −1 Heat per shot.",
+    "effect": {
+     "heatPerShot": -1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Violet tip: spirits take 30% more.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "prismglass",
+   "name": "Prismglass",
+   "family": "crystal",
+   "P": 5,
+   "C": 4,
+   "R": 6,
+   "S": 3,
+   "Cn": 8,
+   "draw": "Sunlight 80%, wielder 20%",
+   "bite": {
+    "flesh": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0.25,
+   "color": "#d6f2ff",
+   "drawMix": {
+    "sun": 0.8,
+    "wielder": 0.2
+   },
+   "grip": {
+    "perk": "Sun-catcher: charges in bright daylight.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Fragile glass: −1 Heat limit.",
+    "effect": {
+     "heatLimit": -1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Prism tip: every shot also splits a weak copy off each side.",
+    "effect": {
+     "sideCopies": 2
+    }
+   }
+  },
+  {
+   "id": "rime-crystal",
+   "name": "Rime Crystal",
+   "family": "crystal",
+   "P": 6,
+   "C": 5,
+   "R": 7,
+   "S": 4,
+   "Cn": 8,
+   "draw": "Cold 70%, wielder 30%",
+   "bite": {
+    "fireborn": 1.5
+   },
+   "sockets": 4,
+   "flankChance": 0.15,
+   "color": "#bfe6fb",
+   "drawMix": {
+    "cold": 0.7,
+    "wielder": 0.3
+   },
+   "grip": {
+    "perk": "Cold-drawn: charges at night and in rain.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Melts near fire: each Fire crystal adds 1 more Heat.",
+    "effect": {
+     "fireHeat": 1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Frost tip: Water shots freeze targets in place.",
+    "effect": {
+     "freeze": 1
+    }
+   }
+  },
+  {
+   "id": "rock-salt",
+   "name": "Rock Salt",
+   "family": "crystal",
+   "P": 5,
+   "C": 4,
+   "R": 5,
+   "S": 5,
+   "Cn": 6,
+   "draw": "Wielder 100%",
+   "bite": {
+    "spirit": 1.5
+   },
+   "sockets": 3,
+   "flankChance": 0.1,
+   "color": "#efd3d1",
+   "drawMix": {
+    "wielder": 1
+   },
+   "grip": {
+    "perk": "Purifying: charges only from you.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Dissolves slowly in rain or with Water crystals (not in the lab yet).",
+    "effect": {},
+    "lab": false
+   },
+   "cap": {
+    "perk": "Salt tip: spirits and undead take 50% more.",
+    "effect": {}
+   }
+  },
+  {
+   "id": "living-coral",
+   "name": "Living Coral",
+   "family": "exotic",
+   "P": 4,
+   "C": 6,
+   "R": 7,
+   "S": 5,
+   "Cn": 7,
+   "draw": "Seawater 80%, wielder 20%",
+   "bite": {
+    "flesh": 1.3
+   },
+   "sockets": 3,
+   "flankChance": 0,
+   "color": "#f27b66",
+   "drawMix": {
+    "seawater": 0.8,
+    "wielder": 0.2
+   },
+   "grip": {
+    "perk": "Sea-hungry: barely charges away from the sea.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Alive: grows sockets if kept in water (not in the lab yet).",
+    "effect": {},
+    "lab": false
+   },
+   "cap": {
+    "perk": "Wet tip: every hit soaks the target.",
+    "effect": {
+     "addEffects": [
+      "soak"
+     ]
+    }
+   }
+  },
+  {
+   "id": "amber",
+   "name": "Amber (with insect)",
+   "family": "exotic",
+   "P": 5,
+   "C": 5,
+   "R": 5,
+   "S": 6,
+   "Cn": 6,
+   "draw": "Sunlight 50%, wielder 50%",
+   "bite": {
+    "plant": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0.1,
+   "color": "#df8f1d",
+   "drawMix": {
+    "sun": 0.5,
+    "wielder": 0.5
+   },
+   "grip": {
+    "perk": "Warm resin: charges in daylight.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Preserving: attunement builds twice as fast (not in the lab yet).",
+    "effect": {},
+    "lab": false
+   },
+   "cap": {
+    "perk": "Memory tip: every 5th shot fires twice for free.",
+    "effect": {
+     "replay": 5
+    }
+   }
+  },
+  {
+   "id": "nautilus",
+   "name": "Nautilus Shell",
+   "family": "exotic",
+   "P": 5,
+   "C": 5,
+   "R": 5,
+   "S": 4,
+   "Cn": 7,
+   "draw": "Water 50%, wielder 50%",
+   "bite": {
+    "flesh": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0,
+   "color": "#e3c3a1",
+   "drawMix": {
+    "water": 0.5,
+    "wielder": 0.5
+   },
+   "grip": {
+    "perk": "Sea-shell: charges in rain.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Spiral spine: the last socket feeds back into the first (built-in loop).",
+    "effect": {
+     "spiral": 1
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Spiral tip: shots corkscrew and bounce 1 more time.",
+    "effect": {
+     "bounceBonus": 1
+    }
+   }
+  },
+  {
+   "id": "thornvine",
+   "name": "Thornvine",
+   "family": "exotic",
+   "P": 8,
+   "C": 5,
+   "R": 9,
+   "S": 4,
+   "Cn": 6,
+   "draw": "Wielder's blood 100%",
+   "bite": {
+    "flesh": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0.15,
+   "color": "#3e5c2b",
+   "drawMix": {
+    "blood": 1
+   },
+   "grip": {
+    "perk": "Feeds on blood: fast recharge, paid in your health.",
+    "effect": {
+     "blood": 1
+    }
+   },
+   "shaft": {
+    "perk": "Thorned channel: +20% power.",
+    "effect": {
+     "powerMult": 1.2
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Barbed tip: hits make targets bleed.",
+    "effect": {
+     "addEffects": [
+      "burn"
+     ]
+    }
+   }
+  },
+  {
+   "id": "fulgurite",
+   "name": "Fulgurite",
+   "family": "exotic",
+   "P": 7,
+   "C": 4,
+   "R": 8,
+   "S": 3,
+   "Cn": 9,
+   "draw": "Storms 90%, wielder 10%",
+   "bite": {
+    "metal": 1.4
+   },
+   "sockets": 4,
+   "flankChance": 0.2,
+   "color": "#b7a684",
+   "drawMix": {
+    "storm": 0.9,
+    "wielder": 0.1
+   },
+   "grip": {
+    "perk": "Lightning glass: barely charges outside storms.",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Storm channel: every reaction +15%.",
+    "effect": {
+     "reactionBoost": 1.15
+    },
+    "lab": true
+   },
+   "cap": {
+    "perk": "Lightning tip: chains jump 1 more time.",
+    "effect": {
+     "chainBonus": 1
+    }
+   }
+  },
+  {
+   "id": "dreamwood",
+   "name": "Dreamwood",
+   "family": "exotic",
+   "P": 5,
+   "C": 5,
+   "R": 5,
+   "S": 5,
+   "Cn": 5,
+   "draw": "Sleep and rest 100%",
+   "bite": {
+    "spirit": 1.3
+   },
+   "sockets": 4,
+   "flankChance": 0.3,
+   "color": "#6b5b9c",
+   "drawMix": {
+    "sleep": 1
+   },
+   "grip": {
+    "perk": "Dream-drawn: charges while you rest (slowly in the lab).",
+    "effect": {}
+   },
+   "shaft": {
+    "perk": "Dream-grain: shows the next shot's shape before you fire (always on in the lab).",
+    "effect": {},
+    "lab": true
+   },
+   "cap": {
+    "perk": "Dream tip: spirits take 30% more.",
+    "effect": {}
+   }
+  }
+ ],
+ "drawSources": {
+  "wielder": "You",
+  "water": "Rain and water",
+  "seawater": "Seawater",
+  "moon": "Moonlight",
+  "sky": "Night sky",
+  "sun": "Sunlight",
+  "ground": "Bare ground",
+  "still": "Standing still",
+  "calm": "Calm stillness",
+  "motion": "Moving",
+  "kills": "Kills",
+  "fire": "Fire nearby",
+  "storm": "Storms",
+  "wind": "Wind",
+  "allies": "Allies nearby",
+  "cold": "Cold",
+  "blood": "Your blood",
+  "growth": "Growing things",
+  "sleep": "Rest"
+ }
 }

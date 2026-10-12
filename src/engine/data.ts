@@ -5,9 +5,60 @@ import elementsJson from '../data/elements.json';
 import crystalsJson from '../data/crystals.json';
 import dummiesJson from '../data/dummies.json';
 import presetsJson from '../data/presets.json';
+import formsJson from '../data/forms.json';
 
 export type ElementId = 'fire' | 'water' | 'earth' | 'wind';
 export type Family = 'wood' | 'metal' | 'stone' | 'bone' | 'crystal' | 'exotic';
+
+/** Effect keys a part can carry; read by the engine (and a few by the lab's range). */
+export interface PartEffect {
+  // grip
+  steady?: number; // spread multiplier
+  capacity?: number; // capacity multiplier
+  killRefill?: number; // fraction of max charge refilled on a kill (scaled by the kills share)
+  calm?: number; // backlash multiplier
+  blood?: number; // recharge costs health
+  // shaft
+  elementBoost?: Partial<Record<ElementId, number>>;
+  heatLimit?: number;
+  killCool?: number;
+  overload?: 'fireBurst' | 'alsoCrack';
+  knot?: number;
+  loopStrength?: number;
+  loopCap?: number;
+  tempo?: number;
+  drainReduce?: number;
+  fireDouble?: number;
+  heatPerShot?: number;
+  modifierBoost?: number;
+  fireHeat?: number;
+  spiral?: number;
+  powerMult?: number;
+  reactionBoost?: number;
+  // cap
+  steer?: number;
+  addEffects?: string[];
+  speed?: number;
+  chainBonus?: number;
+  nightPower?: number;
+  pierceBonus?: number;
+  crit?: number;
+  heavy?: number;
+  magnet?: number;
+  mark?: number;
+  seeds?: number;
+  fireBoost?: number;
+  sideCopies?: number;
+  freeze?: number;
+  replay?: number;
+  bounceBonus?: number;
+}
+
+export interface PartRole {
+  perk: string;
+  effect: PartEffect;
+  lab?: boolean;
+}
 
 export interface Material {
   id: string;
@@ -20,7 +71,26 @@ export interface Material {
   flankChance: number;
   velocity?: number;
   tempo?: number;
-  quirk: string;
+  color: string;
+  drawMix: Record<string, number>;
+  grip: PartRole;
+  shaft: PartRole;
+  cap: PartRole;
+}
+
+export type FormId = 'twig' | 'wand' | 'grafted' | 'master' | 'staff';
+
+export interface WandForm {
+  id: FormId;
+  name: string;
+  parts: ('grip' | 'shaft' | 'cap')[];
+  maxSockets: number;
+  socketBonus: number;
+  flanks: 'none' | 'one' | 'full';
+  powerMult: number;
+  tempoMult: number;
+  twoHanded: boolean;
+  text: string;
 }
 
 export interface ElementDef {
@@ -75,15 +145,18 @@ export interface DummyDef {
 export interface Preset {
   id: string;
   name: string;
-  grip: string;
+  group: string;
+  form: FormId;
+  note?: string;
+  grip: string | null;
   shaft: string;
-  cap: string;
+  cap: string | null;
   spine: (string | null)[];
   flanks: Record<string, string>;
 }
 
 export const FAMILIES = materialsJson.families as Record<Family, { velocity: number; tempo: number }>;
-export const MATERIALS = materialsJson.materials as Material[];
+export const MATERIALS = materialsJson.materials as unknown as Material[];
 export const ELEMENTS = elementsJson.elements as Record<ElementId, ElementDef>;
 export const REACTIONS = elementsJson.reactions as Record<string, Reaction>;
 export const SECOND_ORDER = elementsJson.secondOrder as Record<string, Reaction>;
@@ -91,6 +164,8 @@ export const CRYSTALS = crystalsJson.crystals as Crystal[];
 export const QUALITIES = crystalsJson.quality as Quality[];
 export const DUMMIES = dummiesJson.dummies as DummyDef[];
 export const PRESETS = presetsJson.presets as Preset[];
+export const FORMS = formsJson.forms as WandForm[];
+export const DRAW_SOURCES = (materialsJson as unknown as { drawSources: Record<string, string> }).drawSources;
 
 const byId = <T extends { id: string }>(list: T[]) => new Map(list.map((x) => [x.id, x]));
 const materialMap = byId(MATERIALS);
@@ -101,6 +176,12 @@ export function material(id: string): Material {
   const m = materialMap.get(id);
   if (!m) throw new Error(`Unknown material: ${id}`);
   return m;
+}
+
+export function form(id: string): WandForm {
+  const f = FORMS.find((x) => x.id === id);
+  if (!f) throw new Error(`Unknown wand form: ${id}`);
+  return f;
 }
 
 export function crystal(id: string): Crystal {

@@ -6,6 +6,8 @@ import { DUMMIES, DummyDef, ELEMENTS, ElementId, material } from '../engine/data
 import { Shot, damageMultiplier } from '../engine/resolve';
 import { HEAT_COOLING_PER_SECOND, makeRng, rollOverload } from '../engine/overload';
 import { emit, state } from './state';
+import { buildWandModel } from './wandModel';
+import { drawReport } from '../engine/wand';
 import { logLine } from './side';
 import { toast } from './toast';
 
@@ -43,6 +45,7 @@ interface Dummy {
   burnDps: number;
   soakedUntil: number;
   rootedUntil: number;
+  markedUntil: number;
   phased: boolean;
   wobble: number;
   respawnAt: number;
@@ -101,7 +104,12 @@ export class World {
   private time = 0;
   private player = { u: PLAYER_START.u, v: PLAYER_START.v, facing: 0, moving: false, hurt: 0 };
   private playerGroup = new THREE.Group();
-  private wandTip = new THREE.Mesh();
+  private wandHolder = new THREE.Group();
+  private hemi!: THREE.HemisphereLight;
+  private sun!: THREE.DirectionalLight;
+  private rain: THREE.LineSegments | null = null;
+  private flash = 0;
+  private shotsFired = 0;
   private aimLines = new THREE.Group();
   private dummies: Dummy[] = [];
   private projectiles: Projectile[] = [];
@@ -119,6 +127,7 @@ export class World {
   private pending: { at: number; fn: () => void }[] = [];
   charge = 0;
   heat = 0;
+  drawNow = 1;
 
   constructor(private canvas: HTMLCanvasElement, private labels: HTMLElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
@@ -150,8 +159,10 @@ export class World {
     s.background = new THREE.Color('#1c2a26');
     s.fog = new THREE.Fog('#1c2a26', 90, 150);
 
-    s.add(new THREE.HemisphereLight('#c9d8ff', '#3a3020', 0.9));
+    this.hemi = new THREE.HemisphereLight('#c9d8ff', '#3a3020', 0.9);
+    s.add(this.hemi);
     const sun = new THREE.DirectionalLight('#ffe2b8', 2.1);
+    this.sun = sun;
     sun.position.set(30, 50, 12);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -252,15 +263,9 @@ export class World {
     hat.position.y = 2.15;
     hat.rotation.z = 0.12;
     hat.castShadow = true;
-    const wand = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.9, 6), new THREE.MeshStandardMaterial({ color: '#8a6440' }));
-    wand.rotation.z = Math.PI / 2;
-    wand.position.set(0.55, 1.15, 0);
-    this.wandTip = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), new THREE.MeshBasicMaterial({ color: state.shot.color }));
-    this.wandTip.position.set(1.0, 1.15, 0);
-    const tipGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.glowTex, color: state.shot.color, blending: THREE.AdditiveBlending, depthWrite: false }));
-    tipGlow.scale.set(0.8, 0.8, 0.8);
-    this.wandTip.add(tipGlow);
-    g.add(robe, head, hat, wand, this.wandTip);
+    this.wandHolder.position.set(0.3, 1.15, 0.12);
+    g.add(robe, head, hat, this.wandHolder);
+    this.refreshWand();
     g.position.copy(toWorld(this.player.u, this.player.v));
     this.scene.add(g);
   }
@@ -352,7 +357,7 @@ export class World {
         this.dummies.push({
           def, u: spot.u, v: spot.v, h: def.id === 'wisp' ? 1.5 : 0,
           hp: def.hp, shell: def.shell ?? 0, ward: def.ward ?? 0,
-          lastHit: -99, burnUntil: 0, burnDps: 0, soakedUntil: 0, rootedUntil: 0,
+          lastHit: -99, burnUntil: 0, burnDps: 0, soakedUntil: 0, rootedUntil: 0, markedUntil: 0,
           phased: false, wobble: 0, respawnAt: 0, recent: [], group, wardMesh: ward, label,
         });
       } else if (!want && have) {
@@ -385,9 +390,49 @@ export class World {
   }
 
   /** Called when the wand changes. */
+  /** Put the built wand (or staff) in the player's hand. */
+  private refreshWand() {
+    this.wandHolder.clear();
+    const model = buildWandModel(state.build, state.shot, this.glowTex);
+    const scale = 1.25;
+    model.group.scale.setScalar(scale);
+    if (state.shot.stats.form.twoHanded) {
+      // a staff is held upright-ish, planted beside the wizard
+      model.group.rotation.z = 1.1;
+      model.group.position.set(-0.25, -1.0, 0);
+    }
+    this.wandHolder.add(model.group);
+  }
+
+  onEnvChanged() {
+    const night = state.env.time === 'night';
+    const wet = state.env.weather !== 'clear';
+    this.scene.background = new THREE.Color(night ? '#0d1520' : wet ? '#26302e' : '#1c2a26');
+    (this.scene.fog as THREE.Fog).color.copy(this.scene.background as THREE.Color);
+    this.hemi.color.set(night ? '#6f86c8' : '#c9d8ff');
+    this.hemi.intensity = night ? 0.45 : wet ? 0.7 : 0.9;
+    this.sun.color.set(night ? '#a9c2ff' : '#ffe2b8');
+    this.sun.intensity = night ? 0.6 : wet ? 1.1 : 2.1;
+    if (this.rain) {
+      this.scene.remove(this.rain);
+      this.rain = null;
+    }
+    if (wet) {
+      const n = state.env.weather === 'storm' ? 1400 : 800;
+      const pos = new Float32Array(n * 6);
+      for (let i = 0; i < n; i++) {
+        const p = toWorld((this.rng() - 0.5) * 50, (this.rng() - 0.5) * 32, this.rng() * 14);
+        pos.set([p.x, p.y, p.z, p.x + 0.08, p.y - 0.6, p.z + 0.08], i * 6);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      this.rain = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: '#a8c4e0', transparent: true, opacity: 0.45 }));
+      this.scene.add(this.rain);
+    }
+  }
+
   onBuildChanged() {
-    (this.wandTip.material as THREE.MeshBasicMaterial).color.set(state.shot.color);
-    ((this.wandTip.children[0] as THREE.Sprite).material as THREE.SpriteMaterial).color.set(state.shot.color);
+    this.refreshWand();
     // a different wand comes off the bench fully charged and cool
     this.charge = state.shot.stats.maxCharge;
     this.heat = 0;
@@ -464,7 +509,7 @@ export class World {
     this.heat += shot.heat;
     const limit = stats.heatLimit - state.stabilityLoss;
     if (state.sandbox.overloads && this.heat > limit) {
-      const o = rollOverload(this.heat - limit, this.rng, stats.parts.shaft.id);
+      const o = rollOverload(this.heat - limit, this.rng, stats.shaftEffect, shot.backlashMult);
       this.heat = limit * 0.5;
       toast(`${o.title} ${o.text}`, 'alert', 2600);
       logLine(`<b>Overload: ${esc(o.title)}</b> ${esc(o.text)}`, 'overload');
@@ -476,8 +521,8 @@ export class World {
         this.player.hurt = 0.5;
         logLine(`Backlash hits you for <b>${Math.round(shot.powerEach * o.backlash)}</b>.`, 'overload');
       }
-      if (o.kind === 'crack') {
-        state.stabilityLoss += 1;
+      if (o.stabilityLoss) {
+        state.stabilityLoss += o.stabilityLoss;
         emit();
       }
       if (o.kind === 'surge') {
@@ -498,6 +543,11 @@ export class World {
       this.fireVolley(s, shot.powerEach * powerMult * mult, label);
     };
     volley(1, '');
+    this.shotsFired++;
+    if (shot.replayEvery && this.shotsFired % shot.replayEvery === 0) {
+      this.pending.push({ at: this.time + 0.15, fn: () => volley(1, 'replay') });
+      logLine(`${esc(stats.parts.cap?.name ?? 'Cap')} remembers: this shot fires twice.`);
+    }
     for (let e = 1; e <= shot.echoes; e++) {
       this.pending.push({ at: this.time + 0.5 * e, fn: () => volley(Math.pow(0.6, e), 'echo') });
     }
@@ -639,11 +689,36 @@ export class World {
     return amount;
   }
 
+  private nearest(p: { u: number; v: number }, ok: (d: Dummy) => boolean, within: number): Dummy | null {
+    let best: Dummy | null = null;
+    let bd = within;
+    for (const d of this.dummies) {
+      if (d.respawnAt || !ok(d)) continue;
+      const dist = Math.hypot(d.u - p.u, d.v - p.v);
+      if (dist < bd) {
+        bd = dist;
+        best = d;
+      }
+    }
+    return best;
+  }
+
   private breakDummy(d: Dummy) {
     d.hp = 0;
     d.respawnAt = this.time + 1.4;
     this.puff(d.u, d.v, 1.4, d.def.color, 26);
     logLine(`<b>${esc(d.def.name)}</b> broke. It rebuilds in a moment.`, 'kill');
+    // grips that feed on kills refill, shafts that feed on kills cool down
+    const st = state.shot.stats;
+    const refill = (st.gripEffect.killRefill ?? 0) * st.maxCharge;
+    if (refill > 0) {
+      this.charge = Math.min(st.maxCharge, this.charge + refill);
+      logLine(`${esc(st.parts.grip?.name ?? 'Grip')} grip drinks in the kill: +${Math.round(refill)} charge.`, 'kill');
+    }
+    if (st.shaftEffect.killCool) {
+      this.heat = Math.max(0, this.heat - st.shaftEffect.killCool);
+      logLine(`${esc(st.parts.shaft.name)} shaft cools by ${st.shaftEffect.killCool} Heat.`, 'kill');
+    }
   }
 
   private impact(p: Projectile, d: Dummy | null, at: { u: number; v: number; h: number }) {
@@ -651,7 +726,10 @@ export class World {
     const crit = this.rng() < shot.critChance;
     let power = p.power;
     if (shot.effects.includes('bouncePower')) power *= 1 + 0.15 * p.bouncesUsed;
-    if (d) this.damage(d, shot, power, p.bouncesUsed ? `after ${p.bouncesUsed} bounce${p.bouncesUsed > 1 ? 's' : ''}` : '', crit);
+    if (d) {
+      this.damage(d, shot, power, p.bouncesUsed ? `after ${p.bouncesUsed} bounce${p.bouncesUsed > 1 ? 's' : ''}` : '', crit);
+      if (shot.mark) d.markedUntil = this.time + 6;
+    }
     this.burst(at.u, at.v, at.h, shot.color, 10);
 
     const others = (r: number) =>
@@ -665,7 +743,7 @@ export class World {
     if (shot.effects.includes('chain') && d) {
       let from = d;
       const done = new Set<Dummy>([d]);
-      for (let k = 0; k < 3; k++) {
+      for (let k = 0; k < 3 + shot.chainBonus; k++) {
         const next = this.dummies
           .filter((o) => !done.has(o) && !o.respawnAt && Math.hypot(o.u - from.u, o.v - from.v) < 10)
           .sort((a, b) => Number(b.soakedUntil > this.time) - Number(a.soakedUntil > this.time) || Math.hypot(a.u - from.u, a.v - from.v) - Math.hypot(b.u - from.u, b.v - from.v))[0];
@@ -814,9 +892,30 @@ export class World {
     this.playerGroup.position.y = this.player.hurt > 0 ? Math.sin(this.time * 60) * 0.05 : 0;
 
     // charge and heat
-    let rechargeMult = shot.rechargeMult;
-    if (stats.parts.grip.id === 'basalt') rechargeMult *= this.player.moving ? 0 : 1.5;
-    this.charge = Math.min(stats.maxCharge, this.charge + stats.chargePerSecond * rechargeMult * dt);
+    // recharge flows from the grip's draw sources, scaled by time, weather and whether you're moving
+    this.drawNow = drawReport(stats, state.env, this.player.moving).mult;
+    this.charge = Math.min(stats.maxCharge, this.charge + stats.chargePerSecond * shot.rechargeMult * this.drawNow * dt);
+
+    // weather
+    if (this.rain) {
+      const pos = this.rain.geometry.getAttribute('position') as THREE.BufferAttribute;
+      const arr = pos.array as Float32Array;
+      const fall = (state.env.weather === 'storm' ? 26 : 18) * dt;
+      for (let i = 0; i < arr.length; i += 6) {
+        arr[i + 1] -= fall;
+        arr[i + 4] -= fall;
+        if (arr[i + 4] < 0) {
+          arr[i + 1] += 14;
+          arr[i + 4] += 14;
+        }
+      }
+      pos.needsUpdate = true;
+    }
+    if (state.env.weather === 'storm') {
+      if (this.flash <= 0 && this.rng() < dt * 0.25) this.flash = 0.25;
+      this.flash -= dt;
+      this.hemi.intensity = this.flash > 0 ? 2.4 : state.env.time === 'night' ? 0.45 : 0.7;
+    }
     this.heat = Math.max(0, this.heat - HEAT_COOLING_PER_SECOND * dt);
 
     // firing
@@ -857,6 +956,29 @@ export class World {
           alive = false;
         }
       } else {
+        // gentle pulls from the cap: toward your aim (Willow), toward armor (Lodestone), toward chalk marks (Chalk)
+        if (!p.homing && p.life < 2.55) {
+          let pull: { u: number; v: number } | null = null;
+          if (p.shot.mark) {
+            const m = this.nearest(p, (d) => d.markedUntil > this.time && !p.hit.has(d), 12);
+            if (m) pull = m;
+          }
+          if (!pull && p.shot.magnet) {
+            const m = this.nearest(p, (d) => (d.def.category === 'metal' || d.def.category === 'stone') && !p.hit.has(d), 9);
+            if (m) pull = m;
+          }
+          if (!pull && p.shot.steer && this.mouse.overCanvas) pull = { u: this.mouse.u, v: this.mouse.v };
+          if (pull) {
+            const want = Math.atan2(pull.v - p.v, pull.u - p.u);
+            const cur = Math.atan2(p.dv, p.du);
+            let diff = want - cur;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            const turn = clamp(diff, -1.8 * dt, 1.8 * dt);
+            p.du = Math.cos(cur + turn);
+            p.dv = Math.sin(cur + turn);
+          }
+        }
         if (p.homing && p.target && !p.target.respawnAt) {
           const want = Math.atan2(p.target.v - p.v, p.target.u - p.u);
           const cur = Math.atan2(p.dv, p.du);
@@ -1078,6 +1200,7 @@ export class World {
       const k = state.sandbox.infiniteCharge ? 1 : this.charge / st.maxCharge;
       (cm.querySelector('.bar i') as HTMLElement).style.width = `${k * 100}%`;
       cm.querySelector('.meter-value')!.textContent = state.sandbox.infiniteCharge ? 'infinite' : `${Math.floor(this.charge)} / ${st.maxCharge}`;
+      cm.title = `Refilling at ${Math.round(this.drawNow * 100)}% speed from the grip's draw sources.`;
       cm.classList.toggle('low', !state.sandbox.infiniteCharge && this.charge < state.shot.drain);
     }
     if (hm) {

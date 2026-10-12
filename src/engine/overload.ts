@@ -2,6 +2,8 @@
 // The wand keeps a running Heat total: each shot adds its Heat, and Heat cools over time.
 // Going over the limit rolls on the overload table.
 
+import { PartEffect } from './data';
+
 export type OverloadKind = 'fizzle' | 'backlash' | 'crack' | 'surge' | 'fireBurst';
 
 export interface Overload {
@@ -32,9 +34,10 @@ export function makeRng(seed = 1): () => number {
 
 /**
  * Roll the overload table. The further over the limit, the likelier the bad (and wild) results.
- * Emberpine turns fizzles and backlashes into fire bursts; Amethyst halves backlash.
+ * The shaft can change the outcome (Emberpine: fire bursts instead of misfires; Obsidian: always cracks),
+ * and the grip can soften backlash (Amethyst).
  */
-export function rollOverload(excess: number, rng: () => number, shaftId: string): Overload {
+export function rollOverload(excess: number, rng: () => number, shaftEffect: PartEffect = {}, backlashMult = 1): Overload {
   const push = Math.min(0.25, excess * 0.03);
   const r = rng();
   // base odds: fizzle 45%, backlash 25%, crack 15%, surge 15%; excess shifts odds from fizzle toward crack and surge
@@ -47,18 +50,19 @@ export function rollOverload(excess: number, rng: () => number, shaftId: string)
   else if (r < pFizzle + pBacklash + pCrack) kind = 'crack';
   else kind = 'surge';
 
-  if (shaftId === 'emberpine' && (kind === 'fizzle' || kind === 'backlash')) kind = 'fireBurst';
-  const amethyst = shaftId === 'amethyst' ? 0.5 : 1;
+  if (shaftEffect.overload === 'fireBurst' && (kind === 'fizzle' || kind === 'backlash')) kind = 'fireBurst';
+  const amethyst = backlashMult;
+  const alsoCrack = shaftEffect.overload === 'alsoCrack' ? 1 : 0;
 
   switch (kind) {
     case 'fizzle':
-      return { kind, title: 'Fizzle', text: 'The shot fails; charge is lost.', powerMult: 0, backlash: 0, stabilityLoss: 0 };
+      return { kind, title: 'Fizzle', text: `The shot fails; charge is lost.${alsoCrack ? ' The glass cracks.' : ''}`, powerMult: 0, backlash: 0, stabilityLoss: alsoCrack };
     case 'backlash':
-      return { kind, title: 'Backlash', text: "The shot's element hits you.", powerMult: 1, backlash: 0.25 * amethyst, stabilityLoss: 0 };
+      return { kind, title: 'Backlash', text: `The shot's element hits you.${alsoCrack ? ' The glass cracks.' : ''}`, powerMult: 1, backlash: 0.25 * amethyst, stabilityLoss: alsoCrack };
     case 'crack':
       return { kind, title: 'Crack', text: 'The wand loses 1 Stability until repaired.', powerMult: 1, backlash: 0, stabilityLoss: 1 };
     case 'surge':
-      return { kind, title: 'Wild surge!', text: 'Triple power and a random extra element.', powerMult: 3, backlash: 0, stabilityLoss: 0 };
+      return { kind, title: 'Wild surge!', text: `Triple power and a random extra element.${alsoCrack ? ' The glass cracks.' : ''}`, powerMult: 3, backlash: 0, stabilityLoss: alsoCrack };
     case 'fireBurst':
       return { kind, title: 'Resin flare', text: 'Emberpine resin ignites: a burst of fire around you.', powerMult: 1, backlash: 0, stabilityLoss: 0 };
   }
