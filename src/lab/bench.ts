@@ -1,5 +1,5 @@
-// The wand bench: wand form, the built wand (3D view plus a drag-and-drop layout of grip,
-// shaft, sockets and cap), the shot readout, the parts list with what each material does
+// The wand bench: wand form, the built wand (3D view plus a drag-and-drop layout of hilt,
+// shaft, sockets and tip), the shot readout, the parts list with what each material does
 // in each slot, and the crystal palette.
 import {
   CRYSTALS,
@@ -12,16 +12,15 @@ import {
   Material,
   PRESETS,
   QUALITIES,
+  Zone,
   crystal,
   material,
 } from '../engine/data';
 import { buildFromPreset } from '../engine/presets';
-import { WandBuild, drawReport } from '../engine/wand';
+import { WandBuild, drawReport, zoneOf, zoneRange } from '../engine/wand';
 import { LabState, emit, loadBlueprints, saveBlueprint, setBuild, state } from './state';
 import { toast } from './toast';
 import { WandView } from './wandModel';
-
-type Zone = 'grip' | 'shaft' | 'cap';
 
 const FAMILY_NAMES: Record<Family, string> = {
   wood: 'Woods',
@@ -32,7 +31,9 @@ const FAMILY_NAMES: Record<Family, string> = {
   exotic: 'Exotics',
 };
 const GROUPS = ['Elements', 'Power', 'Count', 'Form', 'Size', 'Economy', 'Meta'];
-const ZONE_NAMES: Record<Zone, string> = { grip: 'grip', shaft: 'shaft', cap: 'cap' };
+const ZONE_NAMES: Record<Zone, string> = { hilt: 'hilt', shaft: 'shaft', tip: 'tip' };
+const ZONE_ROLE: Record<Zone, string> = { hilt: 'sets the base', shaft: 'shapes the flight', tip: 'exit and impact' };
+const ZONE_SHORT: Record<Zone, string> = { hilt: 'the base', shaft: 'the flight', tip: 'the impact' };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
 const pct = (x: number) => `${Math.round(x * 100)}%`;
@@ -45,7 +46,8 @@ let lastViewColor = '';
 export function mountBench(root: HTMLElement) {
   root.innerHTML = `
     <header class="bench-head">
-      <h1>Wand Lab</h1>
+      <h1>wandGraft</h1>
+      <p class="sub">Wand Lab</p>
       <p>Graft a wand, socket crystals, and test it on the range. Everything here is a free practice copy.</p>
     </header>
     <section class="block" id="b-load"></section>
@@ -59,7 +61,7 @@ export function mountBench(root: HTMLElement) {
     <section class="block" id="b-shot"></section>
     <section class="block">
       <h2 class="block-title">Parts</h2>
-      <p class="help">Every material can be a grip, a shaft or a cap, and does something different in each. Drag one onto the wand, or pick it and use the buttons.</p>
+      <p class="help">Every material can be a hilt, a shaft or a tip, and does something different in each. Drag one onto the wand, or pick it and use the buttons.</p>
       <div id="b-partcard"></div>
       <div id="b-parts"></div>
     </section>
@@ -105,85 +107,85 @@ function formsSection(s: LabState): string {
   const btns = FORMS.map(
     (f) =>
       `<button class="form-btn ${f.id === cur.id ? 'on' : ''}" data-form="${f.id}" aria-pressed="${f.id === cur.id}">
-        <b>${esc(f.name)}</b><small>${f.maxSockets} socket${f.maxSockets === 1 ? '' : 's'}</small></button>`,
+        <b>${esc(f.name)}</b><small>${f.hiltSockets + f.shaftMax + f.tipSockets} sockets</small></button>`,
   ).join('');
   return `<div class="forms" role="group" aria-label="Wand form">${btns}</div><p class="form-text">${esc(cur.text)}</p>`;
 }
 
-function zoneHtml(zone: 'grip' | 'cap', s: LabState): string {
-  const f = s.shot.stats.form;
-  if (!f.parts.includes(zone)) return '';
+function socketHtml(s: LabState, i: number): string {
+  const slot = s.build.spine[i];
+  const zone = zoneOf(s.shot.stats, i);
+  const title = slot
+    ? `${crystal(slot.id).name} (${QUALITIES.find((q) => q.id === slot.quality)?.name}) in the ${zone}. Drag it to another socket, or drag it off the wand to remove it.`
+    : `Empty ${zone} socket. Drag a crystal here.`;
+  return `<div role="button" tabindex="0" class="socket ${slot ? 'filled' : ''}" data-socket="${i}" title="${esc(title)}"
+    aria-label="${zone} socket ${i + 1}: ${slot ? esc(crystal(slot.id).name) : 'empty'}">${slot ? gem(slot.id, slot.quality) : `<span class="socket-num">${i + 1}</span>`}</div>`;
+}
+
+function flankHtml(s: LabState, g: number): string {
+  if (s.shot.stats.maxFlanks === 0 || g >= s.shot.stats.sockets - 1) return '';
+  const slot = s.build.flanks[g];
+  const title = slot
+    ? `Side slot: ${crystal(slot.id).name}. Tints the sockets on both sides, and the next one at half strength. Drag it off to remove.`
+    : 'Side slot: a crystal here tints the sockets on both sides, and the next one at half strength.';
+  return `<div class="flank-gap"><div role="button" tabindex="0" class="flank ${slot ? 'filled' : ''}" data-flank="${g}"
+    title="${esc(title)}" aria-label="Side slot ${g + 1}: ${slot ? esc(crystal(slot.id).name) : 'empty'}">${slot ? gem(slot.id, slot.quality) : ''}</div></div>`;
+}
+
+/** One zone of the wand (hilt, shaft or tip) with the sockets it holds. */
+function zoneBox(s: LabState, zone: Zone): { html: string; grow: number; label: string } {
+  const st = s.shot.stats;
+  const f = st.form;
+  if (zone !== 'shaft' && !f.parts.includes(zone)) return { html: '', grow: 0, label: '' };
   const id = s.build[zone];
   if (!id) {
-    return `<div class="zone ${zone}-zone empty" data-zone="${zone}" title="Drop a material here to fit a ${zone}.">
-      <span>${zone === 'grip' ? 'Grip' : 'Cap'}</span></div>`;
+    return {
+      html: `<div class="zone ${zone}-zone empty" data-zone="${zone}" title="Drop a material here to fit a ${zone}."><span>Drop a ${zone}</span></div>`,
+      grow: 1.4,
+      label: `<span class="muted">No ${zone} yet</span>`,
+    };
   }
   const m = material(id);
-  return `<div class="zone ${zone}-zone fam-${m.family}" style="--c:${m.color}" data-zone="${zone}" draggable="true"
-    title="${esc(m.name)} ${zone}. Drag it off the wand to remove it." aria-label="${esc(m.name)} ${zone}"></div>`;
+  const [start, end] = zoneRange(st, zone);
+  let inner = '';
+  for (let i = start; i < end; i++) inner += socketHtml(s, i) + flankHtml(s, i);
+  const part = zone !== 'shaft' ? 'data-part="1"' : '';
+  return {
+    html: `<div class="zone ${zone}-zone fam-${m.family} ${f.id === 'twig' ? 'twig' : ''}" style="--c:${m.color}" data-zone="${zone}" ${part}
+      title="${esc(m.name)} ${zone}: ${ZONE_ROLE[zone]}. Drop a material on it to swap it${zone !== 'shaft' ? ', or drag it off to remove it' : ''}.">${inner}</div>`,
+    grow: Math.max(1, end - start),
+    label: `<b>${esc(m.name)}</b> ${zone}<small>${ZONE_SHORT[zone]}</small>`,
+  };
 }
 
 function wandSection(s: LabState): string {
-  const b = s.build;
   const st = s.shot.stats;
   const f = st.form;
   const n = st.sockets;
-  const shaft = material(b.shaft);
-  const hasGrip = f.parts.includes('grip');
-  const hasCap = f.parts.includes('cap');
-  const gw = hasGrip ? 16 : 0;
-  const cw = hasCap ? 13 : 5;
-  const usedFlanks = Object.keys(b.flanks).length;
-
-  const sockets = Array.from({ length: n }, (_, i) => {
-    const slot = b.spine[i];
-    const title = slot
-      ? `${crystal(slot.id).name} (${QUALITIES.find((q) => q.id === slot.quality)?.name}). Drag to move, drag off to remove, or click to remove.`
-      : 'Empty socket. Drag a crystal here, or pick one and click.';
-    return `<div role="button" tabindex="0" class="socket ${slot ? 'filled' : ''}" data-socket="${i}" ${slot ? 'draggable="true"' : ''} title="${esc(title)}"
-      aria-label="Socket ${i + 1}: ${slot ? esc(crystal(slot.id).name) : 'empty'}">${slot ? gem(slot.id, slot.quality) : `<span class="socket-num">${i + 1}</span>`}</div>`;
-  }).join('');
-
-  const flanks =
-    st.maxFlanks > 0
-      ? Array.from({ length: n - 1 }, (_, g) => {
-          const slot = b.flanks[g];
-          const left = ((g + 1) / n) * 100;
-          const title = slot ? `Flank: ${crystal(slot.id).name}. Drag off or click to remove.` : 'Flank socket: tints the two sockets beside it.';
-          return `<div role="button" tabindex="0" class="flank ${slot ? 'filled' : ''}" style="left:${left}%" data-flank="${g}" ${slot ? 'draggable="true"' : ''}
-            title="${esc(title)}" aria-label="Flank ${g + 1}: ${slot ? esc(crystal(slot.id).name) : 'empty'}">${slot ? gem(slot.id, slot.quality) : ''}</div>`;
-        }).join('')
-      : '';
-
-  const label = (zone: Zone) => {
-    if (zone !== 'shaft' && !f.parts.includes(zone)) return `<span class="muted">${f.name}s have no ${zone}</span>`;
-    const id = b[zone];
-    return id ? `<b>${esc(material(id).name)}</b> ${zone}` : `<span class="muted">No ${zone} yet</span>`;
-  };
+  const size = n > 8 ? 29 : n > 6 ? 33 : 40;
+  const zones = (['hilt', 'shaft', 'tip'] as Zone[]).map((z) => ({ z, ...zoneBox(s, z) })).filter((x) => x.html);
+  const shaft = material(s.build.shaft);
+  const usedFlanks = Object.keys(s.build.flanks).length;
 
   const holdingNote = s.holding
     ? `Holding <b>${esc(crystal(s.holding).name)}</b>. Click a socket to place it. Esc puts it down.`
     : s.holdingPart
-      ? `Holding <b>${esc(material(s.holdingPart).name)}</b>. Click the grip, shaft or cap to fit it. Esc puts it down.`
-      : 'Drag crystals into sockets and materials onto the wand. Drag off to remove.';
+      ? `Holding <b>${esc(material(s.holdingPart).name)}</b>. Click the hilt, shaft or tip to fit it. Esc puts it down.`
+      : 'Drag crystals into any socket and materials onto the wand. Drag off to remove.';
 
   return `
-    <div class="wand" style="--gw:${gw}%;--cw:${cw}%">
-      <div class="flank-row">${flanks}</div>
+    <div class="wand ${st.maxFlanks > 0 ? 'has-flanks' : ''}" style="--s:${size}px">
       <div class="wand-body">
-        ${hasGrip ? zoneHtml('grip', s) : ''}
-        <div class="zone shaft-zone fam-${shaft.family} ${f.id === 'twig' ? 'twig' : ''}" style="--c:${shaft.color}" data-zone="shaft"
-          title="${esc(shaft.name)} shaft. Drop a material here to change it.">
-          <div class="sockets" style="--n:${n}">${sockets}</div>
-        </div>
-        ${hasCap ? zoneHtml('cap', s) : `<div class="point" style="--c:${shaft.color}"></div>`}
+        ${zones.map((x) => x.html.replace('class="zone', `style="flex-grow:${x.grow}" class="zone`)).join('')}
+        ${f.parts.includes('tip') ? '' : `<div class="point" style="--c:${shaft.color}"></div>`}
       </div>
-      <div class="wand-labels" style="grid-template-columns:${hasGrip ? '1fr ' : ''}2fr ${hasCap ? '1fr' : ''}">
-        ${hasGrip ? `<span>${label('grip')}</span>` : ''}<span class="mid">${label('shaft')}</span>${hasCap ? `<span class="end">${label('cap')}</span>` : ''}
+      <div class="wand-labels">
+        ${zones.map((x) => `<span style="flex-grow:${x.grow}">${x.label}</span>`).join('')}
+        ${f.parts.includes('tip') ? '' : '<span class="point-gap"></span>'}
       </div>
     </div>
     <div class="wand-foot">
-      <p class="flank-note">${st.maxFlanks > 0 ? `Flank sockets: ${usedFlanks} of ${st.maxFlanks} used.` : f.flanks === 'none' ? `${f.name}s have no flank sockets.` : `A ${shaft.name} shaft has no room for flanks.`}</p>
+      <p class="flank-note">${n} socket${n === 1 ? '' : 's'}${st.maxFlanks > 0 ? `, side slots ${usedFlanks} of ${st.maxFlanks}` : f.flanks === 'none' ? `. ${f.name}s have no side slots` : `. A ${shaft.name} shaft has no room for side slots`}.</p>
       <button id="clear" class="ghost small">Empty sockets</button>
     </div>
     <p class="help">${holdingNote}</p>`;
@@ -199,9 +201,9 @@ function statsSection(s: LabState): string {
     .map((p) => `${esc(p.name)} ${pct(p.share)}${p.availability !== 1 ? ` <small>(×${p.availability.toFixed(1)} now)</small>` : ''}`)
     .join(', ');
   return `<div class="stats">
-    ${cell('Potency', st.potency, 'Raw power added to every shot. Mostly from the cap.')}
-    ${cell('Capacity', st.capacity, 'Size of the charge reservoir. Mostly from the grip.')}
-    ${cell('Recharge', st.recharge, 'How fast the reservoir refills. Mostly from the grip.')}
+    ${cell('Potency', st.potency, 'Raw power added to every shot. Mostly from the tip.')}
+    ${cell('Capacity', st.capacity, 'Size of the charge reservoir. Mostly from the hilt.')}
+    ${cell('Recharge', st.recharge, 'How fast the reservoir refills. Mostly from the hilt.')}
     ${cell('Stability', st.stability, 'Heat tolerated before overloading. Mostly from the shaft.')}
     ${cell('Conductivity', st.conductivity, `Boosts keep ${pct(st.fadePerStep)} of their value per socket toward the tip. Mostly from the shaft.`)}
     ${cell('Tempo', st.tempo, 'Cast speed.')}
@@ -271,10 +273,10 @@ function harmonyOf(m: Material) {
   return { harmony, clash };
 }
 
-/** What a material does as a grip, a shaft and a cap. */
+/** What a material does as a hilt, a shaft and a tip. */
 export function partCard(m: Material, s: LabState): string {
   const f = s.shot.stats.form;
-  const fittedAs = (['grip', 'shaft', 'cap'] as Zone[]).filter((z) => s.build[z] === m.id && (z === 'shaft' || f.parts.includes(z)));
+  const fittedAs = (['hilt', 'shaft', 'tip'] as Zone[]).filter((z) => s.build[z] === m.id && (z === 'shaft' || f.parts.includes(z)));
   const draw = Object.entries(m.drawMix)
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => `${DRAW_SOURCES[k] ?? k} ${pct(v)}`)
@@ -295,9 +297,9 @@ export function partCard(m: Material, s: LabState): string {
   };
   return `<div class="part-card" style="--c:${m.color}">
     <div class="pc-head"><span class="swatch fam-${m.family}" style="--c:${m.color}"></span><div><h3>${esc(m.name)}</h3><small>${FAMILY_NAMES[m.family].replace(/s$/, '')}</small></div></div>
-    ${role('grip', 'As a grip', `Charges from ${esc(draw)}. Capacity ${m.C}, recharge ${m.R}.`, m.grip.perk)}
+    ${role('hilt', 'As a hilt', `Charges from ${esc(draw)}. Capacity ${m.C}, recharge ${m.R}.`, m.hilt.perk)}
     ${role('shaft', 'As a shaft', `${m.sockets} sockets, flanks ${pct(m.flankChance)} per gap. Stability ${m.S}, conductivity ${m.Cn}.${harmony.length ? ` Harmony: ${harmony.join(', ')}.` : ''}${clash.length ? ` Clash: ${clash.join(', ')}.` : ''}`, m.shaft.perk, m.shaft.lab !== false)}
-    ${role('cap', 'As a cap', `Potency ${m.P}, shot speed ×${speed}. ${esc(biteText)}`, m.cap.perk)}
+    ${role('tip', 'As a tip', `Potency ${m.P}, shot speed ×${speed}. ${esc(biteText)}`, m.tip.perk)}
   </div>`;
 }
 
@@ -307,10 +309,10 @@ function partsSection(s: LabState): string {
     .map((fam) => {
       const tiles = MATERIALS.filter((m) => m.family === fam)
         .map((m) => {
-          const fittedZones = (['grip', 'shaft', 'cap'] as Zone[]).filter((z) => s.build[z] === m.id);
+          const fittedZones = (['hilt', 'shaft', 'tip'] as Zone[]).filter((z) => s.build[z] === m.id);
           const fitted = fittedZones.length === 3 ? ['whole wand'] : fittedZones.map((z) => ZONE_NAMES[z]);
-          return `<div role="button" tabindex="0" class="mat ${s.holdingPart === m.id ? 'held' : ''} ${state.inspect === m.id ? 'inspected' : ''}" draggable="true" data-material="${m.id}"
-            aria-pressed="${s.holdingPart === m.id}" title="${esc(m.name)}: drag onto the wand, or click to see what it does">
+          return `<div role="button" tabindex="0" class="mat ${s.holdingPart === m.id ? 'held' : ''} ${state.inspect === m.id ? 'inspected' : ''}" data-material="${m.id}"
+            aria-pressed="${s.holdingPart === m.id}" title="${esc(m.name)}: drag onto the hilt, shaft or tip, or click to see what it does">
             <span class="swatch fam-${m.family}" style="--c:${m.color}"></span><span class="mat-name">${esc(m.name)}</span>
             ${fitted.length ? `<span class="fitted">${fitted.join(', ')}</span>` : ''}</div>`;
         })
@@ -325,7 +327,7 @@ function crystalsSection(s: LabState): string {
     const chips = CRYSTALS.filter((c) => c.group === g)
       .map(
         (c) =>
-          `<div role="button" tabindex="0" class="chip ${s.holding === c.id ? 'held' : ''}" draggable="true" data-crystal="${c.id}" title="${esc(c.text)}" aria-pressed="${s.holding === c.id}">
+          `<div role="button" tabindex="0" class="chip ${s.holding === c.id ? 'held' : ''}" data-crystal="${c.id}" title="${esc(c.text)}" aria-pressed="${s.holding === c.id}">
             ${gem(c.id)}<span>${esc(c.name)}</span></div>`,
       )
       .join('');
@@ -367,7 +369,7 @@ export function renderBench(root: HTMLElement, s: LabState) {
 function edit(fn: (b: WandBuild) => void) {
   const b: WandBuild = { ...state.build, spine: [...state.build.spine], flanks: { ...state.build.flanks } };
   fn(b);
-  setBuild(b);
+  setBuild(b, true);
 }
 
 function fitPart(zone: Zone, matId: string) {
@@ -384,7 +386,7 @@ function fitPart(zone: Zone, matId: string) {
   toast(`${material(matId).name} fitted as the ${zone}.`);
 }
 
-function removePart(zone: 'grip' | 'cap') {
+function removePart(zone: 'hilt' | 'tip') {
   edit((b) => {
     b[zone] = null;
   });
@@ -395,7 +397,7 @@ function placeCrystal(target: { socket?: number; flank?: number }, crystalId: st
     const g = target.flank;
     const max = state.shot.stats.maxFlanks;
     if (!state.build.flanks[g] && Object.keys(state.build.flanks).length >= max) {
-      toast(max === 0 ? 'This wand has no flank sockets.' : `This wand only has room for ${max} flank crystal${max === 1 ? '' : 's'}.`);
+      toast(max === 0 ? 'This wand has no side slots.' : `This wand only has room for ${max} side-slot crystal${max === 1 ? '' : 's'}.`);
       return;
     }
   }
@@ -421,7 +423,7 @@ function moveCrystal(from: { socket?: number; flank?: number }, to: { socket?: n
   if (to.flank !== undefined && !get(state.build, to) && from.flank === undefined) {
     const max = state.shot.stats.maxFlanks;
     if (Object.keys(state.build.flanks).length >= max) {
-      toast(max === 0 ? 'This wand has no flank sockets.' : `This wand only has room for ${max} flank crystal${max === 1 ? '' : 's'}.`);
+      toast(max === 0 ? 'This wand has no side slots.' : `This wand only has room for ${max} side-slot crystal${max === 1 ? '' : 's'}.`);
       return;
     }
   }
@@ -433,40 +435,184 @@ function moveCrystal(from: { socket?: number; flank?: number }, to: { socket?: n
   });
 }
 
-// ---------- events ----------
-let dragPayload = '';
-let dropped = false;
+// ---------- drag and drop ----------
+// Pointer-based: a ghost follows the cursor (or finger), works the same for mouse, pen and touch,
+// and never fights the browser's own drag-and-drop. A press without movement is still a click.
+type Source = { kind: 'crystal' | 'material' | 'socket' | 'flank' | 'part'; id: string };
+type Target = { socket?: number; flank?: number; zone?: Zone };
 
-function endDrag(root: HTMLElement) {
-  dragPayload = '';
-  root.classList.remove('dragging', 'dragging-crystal', 'dragging-material', 'dragging-socket', 'dragging-flank', 'dragging-part');
-  root.querySelectorAll('.drop-over').forEach((x) => x.classList.remove('drop-over'));
+interface DragState {
+  src: Source;
+  x0: number;
+  y0: number;
+  pointerId: number;
+  active: boolean;
+  ghost: HTMLElement | null;
+  over: Element | null;
 }
 
-/** Drag events can target a text node; use its element. */
+let drag: DragState | null = null;
+let suppressClick = false;
+
 function elOf(t: EventTarget | null): HTMLElement | null {
   if (t instanceof HTMLElement) return t;
   if (t instanceof Node) return t.parentElement;
   return null;
 }
 
-function targetOf(el: Element | null): { socket?: number; flank?: number; zone?: Zone } | null {
-  if (!el) return null;
-  const s = el.closest<HTMLElement>('[data-socket]');
-  if (s) return { socket: Number(s.dataset.socket) };
-  const f = el.closest<HTMLElement>('[data-flank]');
-  if (f) return { flank: Number(f.dataset.flank) };
-  const z = el.closest<HTMLElement>('[data-zone]');
-  if (z) return { zone: z.dataset.zone as Zone };
+function sourceOf(el: HTMLElement): Source | null {
+  const sock = el.closest<HTMLElement>('[data-socket].filled');
+  if (sock) return { kind: 'socket', id: sock.dataset.socket! };
+  const flank = el.closest<HTMLElement>('[data-flank].filled');
+  if (flank) return { kind: 'flank', id: flank.dataset.flank! };
+  const chip = el.closest<HTMLElement>('[data-crystal]');
+  if (chip) return { kind: 'crystal', id: chip.dataset.crystal! };
+  const mat = el.closest<HTMLElement>('[data-material]');
+  if (mat) return { kind: 'material', id: mat.dataset.material! };
+  if (el.closest('[data-socket],[data-flank]')) return null; // an empty socket
+  const part = el.closest<HTMLElement>('[data-part]');
+  if (part) return { kind: 'part', id: part.dataset.zone! };
   return null;
 }
 
-function accepts(payload: string, t: ReturnType<typeof targetOf>): boolean {
+function targetOf(el: Element | null): Target | null {
+  if (!el) return null;
+  const s = el.closest<HTMLElement>('[data-socket]');
+  const z = el.closest<HTMLElement>('[data-zone]');
+  const zone = z ? (z.dataset.zone as Zone) : undefined;
+  if (s) return { socket: Number(s.dataset.socket), zone };
+  const f = el.closest<HTMLElement>('[data-flank]');
+  if (f) return { flank: Number(f.dataset.flank), zone };
+  if (zone) return { zone };
+  return null;
+}
+
+function accepts(src: Source, t: Target | null): boolean {
   if (!t) return false;
-  const kind = payload.split(':')[0];
-  if (kind === 'crystal' || kind === 'socket' || kind === 'flank') return t.socket !== undefined || t.flank !== undefined;
-  if (kind === 'material' || kind === 'part') return true; // sockets count as the shaft
-  return false;
+  if (src.kind === 'crystal' || src.kind === 'socket' || src.kind === 'flank') return t.socket !== undefined || t.flank !== undefined;
+  return t.zone !== undefined; // materials and parts go onto a zone (a socket counts as its zone)
+}
+
+function ghostFor(src: Source): HTMLElement {
+  const g = document.createElement('div');
+  g.className = 'drag-ghost';
+  if (src.kind === 'crystal') g.innerHTML = gem(src.id) + `<span>${esc(crystal(src.id).name)}</span>`;
+  else if (src.kind === 'socket' || src.kind === 'flank') {
+    const slot = src.kind === 'socket' ? state.build.spine[Number(src.id)] : state.build.flanks[Number(src.id)];
+    if (slot) g.innerHTML = gem(slot.id, slot.quality) + `<span>${esc(crystal(slot.id).name)}</span>`;
+  } else {
+    const id = src.kind === 'material' ? src.id : state.build[src.id as Zone];
+    if (id) {
+      const m = material(id);
+      g.innerHTML = `<span class="swatch fam-${m.family}" style="--c:${m.color}"></span><span>${esc(m.name)}</span>`;
+    }
+  }
+  document.body.appendChild(g);
+  return g;
+}
+
+function moveGhost(x: number, y: number) {
+  if (!drag?.ghost) return;
+  drag.ghost.style.transform = `translate(${x + 12}px, ${y + 10}px)`;
+}
+
+function hitTest(x: number, y: number): Element | null {
+  return document.elementFromPoint(x, y);
+}
+
+function endDrag() {
+  if (drag?.ghost) drag.ghost.remove();
+  document.body.classList.remove('dragging', 'dragging-crystal', 'dragging-material', 'dragging-socket', 'dragging-flank', 'dragging-part');
+  document.querySelectorAll('.drop-over').forEach((x) => x.classList.remove('drop-over'));
+  drag = null;
+}
+
+function onWand(el: Element | null): boolean {
+  return !!el?.closest('.wand-body');
+}
+
+function dropOn(src: Source, t: Target | null, el: Element | null) {
+  const fromWand = src.kind === 'socket' || src.kind === 'flank' || src.kind === 'part';
+  if (!t || !accepts(src, t)) {
+    // dragged off the wand: take it off
+    if (fromWand && !onWand(el)) {
+      if (src.kind === 'socket') placeCrystal({ socket: Number(src.id) }, null);
+      else if (src.kind === 'flank') placeCrystal({ flank: Number(src.id) }, null);
+      else removePart(src.id as 'hilt' | 'tip');
+    }
+    return;
+  }
+  if (src.kind === 'crystal') placeCrystal(t, src.id);
+  else if (src.kind === 'socket') moveCrystal({ socket: Number(src.id) }, t);
+  else if (src.kind === 'flank') moveCrystal({ flank: Number(src.id) }, t);
+  else if (src.kind === 'material') fitPart(t.zone!, src.id);
+  else if (src.kind === 'part') {
+    const from = src.id as 'hilt' | 'tip';
+    const to = t.zone!;
+    const mat = state.build[from];
+    if (mat && to !== from) {
+      if (to !== 'shaft') edit((b) => (b[from] = null));
+      fitPart(to, mat);
+    }
+  }
+}
+
+function wireDrag(root: HTMLElement) {
+  root.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const el = elOf(e.target);
+    if (!el || el.closest('input, select, button:not([role])')) return;
+    const src = sourceOf(el);
+    if (!src) return;
+    drag = { src, x0: e.clientX, y0: e.clientY, pointerId: e.pointerId, active: false, ghost: null, over: null };
+    if (e.pointerType === 'mouse') e.preventDefault(); // no text selection while dragging
+  });
+
+  document.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    if (!drag.active) {
+      if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+      drag.active = true;
+      drag.ghost = ghostFor(drag.src);
+      document.body.classList.add('dragging', `dragging-${drag.src.kind}`);
+      if (drag.src.kind === 'material') state.inspect = drag.src.id;
+    }
+    moveGhost(e.clientX, e.clientY);
+    const el = hitTest(e.clientX, e.clientY);
+    const t = targetOf(el);
+    const over = accepts(drag.src, t) ? el?.closest('[data-socket],[data-flank],[data-zone]') ?? null : null;
+    if (over !== drag.over) {
+      drag.over?.classList.remove('drop-over');
+      over?.classList.add('drop-over');
+      drag.over = over;
+    }
+  });
+
+  document.addEventListener('pointerup', (e) => {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    if (drag.active) {
+      const el = hitTest(e.clientX, e.clientY);
+      const src = drag.src;
+      endDrag();
+      suppressClick = true;
+      window.setTimeout(() => (suppressClick = false), 0);
+      dropOn(src, targetOf(el), el);
+    } else {
+      drag = null; // a plain press: the click handler does the rest
+    }
+  });
+
+  document.addEventListener('pointercancel', () => endDrag());
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && drag?.active) endDrag();
+  });
+  // swallow the click that follows a drag
+  root.addEventListener('click', (e) => {
+    if (suppressClick) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }, true);
 }
 
 export function wireBench(root: HTMLElement) {
@@ -515,7 +661,7 @@ export function wireBench(root: HTMLElement) {
         b.form = btn.dataset.form as WandBuild['form'];
       });
       const st = state.shot.stats;
-      const missing = (['grip', 'cap'] as const).filter((z) => st.form.parts.includes(z) && !state.build[z]);
+      const missing = (['hilt', 'tip'] as const).filter((z) => st.form.parts.includes(z) && !state.build[z]);
       if (missing.length) toast(`${st.form.name}: drop a ${missing.join(' and a ')} onto the wand.`);
       return;
     }
@@ -553,7 +699,7 @@ export function wireBench(root: HTMLElement) {
     if (!t) return;
     if (t.socket !== undefined || t.flank !== undefined) {
       if (state.holding) placeCrystal(t, state.holding);
-      else if (state.holdingPart) fitPart('shaft', state.holdingPart);
+      else if (state.holdingPart) fitPart(t.zone ?? 'shaft', state.holdingPart);
       else placeCrystal(t, null);
       return;
     }
@@ -569,75 +715,9 @@ export function wireBench(root: HTMLElement) {
     }
   });
 
-  root.addEventListener('dragstart', (e) => {
-    const el = elOf(e.target);
-    if (!el) return;
-    const chip = el.closest<HTMLElement>('[data-crystal]');
-    const mat = el.closest<HTMLElement>('[data-material]');
-    const sock = el.closest<HTMLElement>('[data-socket].filled');
-    const flank = el.closest<HTMLElement>('[data-flank].filled');
-    const zone = el.closest<HTMLElement>('[data-zone="grip"],[data-zone="cap"]');
-    if (chip) dragPayload = `crystal:${chip.dataset.crystal}`;
-    else if (mat) {
-      dragPayload = `material:${mat.dataset.material}`;
-      state.inspect = mat.dataset.material!; // shown in the part card once it's fitted
-    }
-    else if (sock) dragPayload = `socket:${sock.dataset.socket}`;
-    else if (flank) dragPayload = `flank:${flank.dataset.flank}`;
-    else if (zone && !zone.classList.contains('empty')) dragPayload = `part:${zone.dataset.zone}`;
-    else return;
-    dropped = false;
-    if (e.dataTransfer) {
-      e.dataTransfer.setData('text/plain', dragPayload);
-      e.dataTransfer.effectAllowed = 'move';
-    }
-    root.classList.add('dragging', `dragging-${dragPayload.split(':')[0]}`);
-  });
+  wireDrag(root);
 
-  root.addEventListener('dragover', (e) => {
-    const t = targetOf(elOf(e.target));
-    if (!dragPayload || !accepts(dragPayload, t)) return;
-    e.preventDefault();
-    const over = elOf(e.target)?.closest('[data-socket],[data-flank],[data-zone]');
-    root.querySelectorAll('.drop-over').forEach((x) => x !== over && x.classList.remove('drop-over'));
-    over?.classList.add('drop-over');
-  });
-
-  root.addEventListener('drop', (e) => {
-    const t = targetOf(elOf(e.target));
-    if (!dragPayload || !t || !accepts(dragPayload, t)) return;
-    e.preventDefault();
-    dropped = true;
-    const [kind, id] = dragPayload.split(':');
-    if (kind === 'crystal') placeCrystal(t, id);
-    else if (kind === 'socket') moveCrystal({ socket: Number(id) }, t);
-    else if (kind === 'flank') moveCrystal({ flank: Number(id) }, t);
-    else if (kind === 'material') fitPart(t.zone ?? 'shaft', id);
-    else if (kind === 'part') {
-      const from = id as 'grip' | 'cap';
-      const to = t.zone ?? 'shaft';
-      const mat = state.build[from];
-      if (mat && to !== from) {
-        if (to !== 'shaft') edit((b) => (b[from] = null));
-        fitPart(to, mat);
-      }
-    }
-    // the dragged element may have been re-rendered away, so its dragend never arrives
-    endDrag(root);
-  });
-
-  root.addEventListener('dragend', () => {
-    // dragged off the wand: remove it
-    if (!dropped && dragPayload) {
-      const [kind, id] = dragPayload.split(':');
-      if (kind === 'socket') placeCrystal({ socket: Number(id) }, null);
-      else if (kind === 'flank') placeCrystal({ flank: Number(id) }, null);
-      else if (kind === 'part') removePart(id as 'grip' | 'cap');
-    }
-    endDrag(root);
-  });
-
-  // the draggable tiles are div buttons (real <button>s can't start a drag in every browser)
+  // tiles, chips and sockets are div buttons: make Enter and Space click them
   root.addEventListener('keydown', (e) => {
     const el = e.target as HTMLElement;
     if ((e.key === 'Enter' || e.key === ' ') && el.getAttribute('role') === 'button') {

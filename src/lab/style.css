@@ -1,4 +1,4 @@
-/* Wand Lab: a wandwright's walnut bench beside a mossy practice grove at dusk. */
+/* wandGraft Wand Lab: a wandwright's walnut bench beside a mossy practice grove at dusk. */
 :root {
   --grove: #1c2a26;
   --walnut: #2a221d;
@@ -51,6 +51,7 @@ button, select, input { font: inherit; color: inherit; }
   color: var(--brass);
 }
 .bench-head p { margin: 0; color: var(--bone-dim); max-width: 34ch; }
+.bench-head .sub { font: 500 15px/1.2 var(--serif); color: var(--bone); margin: -2px 0 6px; }
 
 .block { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .block:last-child { border-bottom: 0; }
@@ -114,46 +115,56 @@ button { cursor: pointer; }
 .form-btn.on { background: var(--walnut-raised); color: var(--brass); }
 .form-text { font-size: 13.5px; color: var(--bone-dim); margin: 8px 0 0; }
 
-/* The built wand: a turning 3D view, then the drag-and-drop layout */
+/* The built wand: a turning 3D view, then the zone-by-zone layout you drag onto */
 #wand-view { display: block; width: 100%; height: 140px; margin: 6px 0 0; }
-.wand { position: relative; padding-top: 30px; margin: 0 0 4px; }
-.flank-row { position: absolute; top: 0; left: var(--gw); right: var(--cw); height: 30px; }
+.wand { position: relative; margin: 0 0 4px; --s: 40px; }
+.wand.has-flanks { padding-top: 26px; }
+.wand-body { display: flex; align-items: stretch; height: calc(var(--s) + 18px); gap: 3px; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
+.zone {
+  position: relative;
+  --c: #8a6440;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 3px;
+}
+.hilt-zone { border-radius: 18px 4px 4px 18px; margin: 4px 0; cursor: grab; }
+.shaft-zone { border-radius: 4px; }
+.shaft-zone.twig { border-radius: 14px 4px 4px 14px; margin: 3px 0; }
+.tip-zone { border-radius: 4px 22px 22px 4px; margin: 2px 0; cursor: grab; }
+.point { flex: 0 0 18px; background: var(--c); clip-path: polygon(0 18%, 100% 50%, 0 82%); margin: 4px 0; filter: brightness(0.85); }
+.zone.empty {
+  background: repeating-linear-gradient(45deg, transparent 0 6px, rgba(214, 171, 92, 0.12) 6px 12px);
+  outline: 2px dashed var(--brass-dim);
+  outline-offset: -2px;
+  font-size: 11.5px;
+  color: var(--brass);
+  cursor: copy;
+  text-align: center;
+  line-height: 1.1;
+}
+/* side slots sit above the gap between two sockets */
+.flank-gap { position: relative; width: 0; align-self: stretch; }
 .flank {
   position: absolute;
-  top: 2px;
-  width: 24px;
-  height: 24px;
-  transform: translateX(-50%) rotate(45deg);
+  top: -27px;
+  left: -11px;
+  width: 22px;
+  height: 22px;
+  transform: rotate(45deg);
   background: var(--walnut-deep);
   border: 1px dashed var(--brass-dim);
   border-radius: 4px;
   display: grid;
   place-items: center;
   padding: 0;
+  z-index: 1;
 }
-.flank .gem { transform: rotate(-45deg); width: 14px; height: 14px; }
-.flank.filled { border-style: solid; border-color: var(--brass); }
+.flank .gem { transform: rotate(-45deg); width: 13px; height: 13px; }
+.flank.filled { border-style: solid; border-color: var(--brass); cursor: grab; }
 .flank .tier { display: none; }
-
-.wand-body { display: flex; align-items: stretch; height: 58px; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35)); }
-.zone { position: relative; --c: #8a6440; }
-.grip-zone { width: var(--gw); border-radius: 16px 4px 4px 16px; margin: 7px 0; cursor: grab; }
-.cap-zone { width: var(--cw); margin: 3px 0; cursor: grab; clip-path: polygon(0 0, 55% 14%, 100% 50%, 55% 86%, 0 100%); }
-.shaft-zone { flex: 1; border-radius: 4px; display: flex; }
-.shaft-zone.twig { border-radius: 14px 4px 4px 14px; margin: 4px 0; }
-.point { width: var(--cw); background: var(--c); clip-path: polygon(0 18%, 100% 50%, 0 82%); margin: 4px 0; filter: brightness(0.85); }
-.zone.empty {
-  background: repeating-linear-gradient(45deg, transparent 0 6px, rgba(214, 171, 92, 0.12) 6px 12px);
-  outline: 2px dashed var(--brass-dim);
-  outline-offset: -2px;
-  display: grid;
-  place-items: center;
-  font-size: 11.5px;
-  color: var(--brass);
-  cursor: copy;
-  clip-path: none;
-}
-.cap-zone.empty { border-radius: 4px 16px 16px 4px; }
 
 /* material looks, by family */
 .fam-wood { background:
@@ -175,16 +186,10 @@ button { cursor: pointer; }
   repeating-linear-gradient(60deg, rgba(255, 255, 255, 0.1) 0 3px, transparent 3px 10px),
   linear-gradient(180deg, color-mix(in srgb, var(--c) 75%, white), var(--c) 50%, color-mix(in srgb, var(--c) 60%, black)); }
 
-.sockets {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(var(--n), 1fr);
-  align-items: center;
-  justify-items: center;
-}
 .socket {
-  width: 40px;
-  height: 40px;
+  width: var(--s);
+  height: var(--s);
+  flex: none;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 60%, #120d0a, #2a201a 70%);
   border: 2px solid rgba(0, 0, 0, 0.45);
@@ -193,16 +198,17 @@ button { cursor: pointer; }
   place-items: center;
   position: relative;
   padding: 0;
+  touch-action: none;
 }
 .socket.filled { cursor: grab; }
 .socket:hover, .flank:hover { border-color: var(--brass); }
-.socket-num { font-size: 12px; color: var(--bone-dim); }
-.wand-labels { display: grid; gap: 6px; font-size: 12.5px; color: var(--bone-dim); margin-top: 6px; }
+.socket-num { font-size: 11px; color: var(--bone-dim); }
+.wand-labels { display: flex; gap: 3px; font-size: 12px; color: var(--bone-dim); margin-top: 5px; }
+.wand-labels > span { flex: 1 1 0; min-width: 0; text-align: center; line-height: 1.2; overflow: hidden; }
 .wand-labels b { color: var(--bone); font-weight: 500; }
-.wand-labels span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.wand-labels .mid { text-align: center; }
+.wand-labels small { display: block; font-size: 11px; opacity: 0.85; }
+.wand-labels .point-gap { flex: 0 0 18px; }
 .wand-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px; }
-.wand-labels .end { text-align: right; }
 .flank-note { font-size: 12.5px; color: var(--bone-dim); margin: 0; }
 .muted { color: var(--bone-dim); opacity: 0.8; }
 .help { font-size: 13.5px; color: var(--bone-dim); margin: 8px 0; }
@@ -227,14 +233,37 @@ button { cursor: pointer; }
 .sticky-wand .help { margin: 6px 0; font-size: 12.5px; }
 
 /* drag and drop */
-#bench.dragging-crystal .socket, #bench.dragging-crystal .flank,
-#bench.dragging-socket .socket, #bench.dragging-socket .flank,
-#bench.dragging-flank .socket, #bench.dragging-flank .flank { box-shadow: 0 0 0 2px var(--brass-dim); }
-#bench.dragging-material .zone, #bench.dragging-part .zone { outline: 2px dashed var(--brass); outline-offset: 2px; }
-.drop-over { outline: 3px solid var(--brass) !important; outline-offset: 2px; }
+body.dragging, body.dragging * { cursor: grabbing !important; }
+body.dragging { user-select: none; -webkit-user-select: none; }
+body.dragging-crystal .socket, body.dragging-crystal .flank,
+body.dragging-socket .socket, body.dragging-socket .flank,
+body.dragging-flank .socket, body.dragging-flank .flank { box-shadow: 0 0 0 2px var(--brass-dim); }
+body.dragging-material .zone, body.dragging-part .zone { outline: 2px dashed var(--brass); outline-offset: 1px; }
+.drop-over { outline: 3px solid var(--brass) !important; outline-offset: 1px; }
 .socket.drop-over, .flank.drop-over { box-shadow: 0 0 14px var(--brass) !important; }
+.drag-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--walnut-raised);
+  border: 1px solid var(--brass);
+  border-radius: 16px;
+  padding: 3px 10px 3px 4px;
+  font-size: 13px;
+  color: var(--bone);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
+}
+.drag-ghost .gem { width: 20px; height: 20px; }
+.drag-ghost .swatch { width: 18px; height: 18px; border-radius: 4px; }
+.drag-ghost .tier { display: none; }
+.chip, .mat { touch-action: pan-y; cursor: grab; }
 
-/* part card: what a material does as grip, shaft and cap */
+/* part card: what a material does as hilt, shaft and tip */
 #b-partcard { scroll-margin-top: 240px; }
 .part-card { background: var(--walnut-deep); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
 .pc-head { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
@@ -283,7 +312,7 @@ button { cursor: pointer; }
   box-shadow: 0 0 10px color-mix(in srgb, var(--gem) 60%, transparent);
   flex: none;
 }
-.socket .gem { width: 28px; height: 28px; }
+.socket .gem { width: calc(var(--s) * 0.7); height: calc(var(--s) * 0.7); }
 .tier {
   position: absolute;
   right: -4px;
@@ -420,6 +449,18 @@ button { cursor: pointer; }
 #toast.alert { border-color: var(--danger); color: #ffd8cc; }
 
 /* ---------- side panel ---------- */
+.tut h3 { font: 700 18px/1.2 var(--serif); margin: 4px 0 4px; color: var(--brass); }
+.tut p { margin: 0 0 8px; font-size: 14px; line-height: 1.45; }
+.tut-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tut-head .block-title { margin: 0; font-size: 14px; color: var(--bone-dim); font-family: var(--sans); font-weight: 500; }
+.dots { display: flex; gap: 3px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--walnut-raised); border: 1px solid var(--line); }
+.dot.done { background: var(--brass-dim); border-color: var(--brass-dim); }
+.dot.now { background: var(--brass); border-color: var(--brass); }
+.tut-actions { display: flex; gap: 6px; }
+.tut-actions button:disabled { opacity: 0.4; cursor: default; }
+.tut.is-done h3 { color: #b8e08a; }
+#tutorial { padding-top: 4px; }
 .dummies { display: flex; flex-direction: column; gap: 4px; }
 .dummy-toggle { display: flex; align-items: center; gap: 8px; padding: 5px 4px; border-radius: 6px; cursor: pointer; }
 .dummy-toggle:hover { background: var(--walnut-raised); }

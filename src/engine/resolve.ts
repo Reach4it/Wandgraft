@@ -6,6 +6,8 @@ import {
   Crystal,
   ELEMENTS,
   PartEffect,
+  Material,
+  Zone,
   ElementId,
   REACTIONS,
   Reaction,
@@ -13,7 +15,7 @@ import {
   crystal as crystalDef,
   quality as qualityDef,
 } from './data';
-import { CrystalSlot, DEFAULT_ENV, Env, WandBuild, WandStats, wandStats } from './wand';
+import { CrystalSlot, DEFAULT_ENV, Env, WandBuild, WandStats, wandStats, zoneOf } from './wand';
 
 export type Form = 'bolt' | 'stream' | 'shard' | 'gust' | 'lob' | 'arcane';
 
@@ -54,17 +56,17 @@ export interface Shot {
   loops: number;
   drain: number;
   heat: number;
-  /** Extra chain jumps (Copper or Fulgurite cap). */
+  /** Extra chain jumps (Copper or Fulgurite tip). */
   chainBonus: number;
-  /** Cap pulls shots toward armored targets (Lodestone). */
+  /** Tip pulls shots toward armored targets (Lodestone). */
   magnet: boolean;
   /** Hits mark targets; later shots curve toward marks (Chalk). */
   mark: boolean;
-  /** Shots curve gently toward the aim point (Willow cap). */
+  /** Shots curve gently toward the aim point (Willow tip). */
   steer: boolean;
-  /** Every Nth shot fires twice (Amber cap); 0 = off. */
+  /** Every Nth shot fires twice (Amber tip); 0 = off. */
   replayEvery: number;
-  /** Multiplier on overload backlash (Amethyst grip). */
+  /** Multiplier on overload backlash (Amethyst hilt). */
   backlashMult: number;
   /** Step-by-step log for the packet trace view. */
   trace: string[];
@@ -78,6 +80,7 @@ interface Entry {
   q: number; // quality strength x knot x quartz bonuses
   qualityName: string;
   spineIndex: number; // original socket (0-based) before inversion
+  zone: Zone;
   halos: Halo[];
 }
 
@@ -85,7 +88,17 @@ interface Halo {
   def: Crystal;
   q: number;
   gap: number;
+  /** The third socket a side slot reaches: half strength, never fuses. */
+  far?: boolean;
 }
+
+/** Crystals that work harder in a given zone (the zone's job in the hilt -> shaft -> tip chain). */
+const ZONE_BOOST: Record<Zone, { ids: Set<string>; mult: number; why: string }> = {
+  hilt: { ids: new Set(['thriftstone', 'wellspring', 'siphon', 'sunstone']), mult: 1.5, why: 'the hilt feeds the base' },
+  shaft: { ids: new Set(['twinspar', 'prismite', 'swiftquartz', 'bloatstone', 'needlepoint', 'seeker', 'mortar', 'echo-opal']), mult: 1.25, why: 'the shaft shapes the flight' },
+  tip: { ids: new Set(['nova', 'lingerite', 'seedstone', 'lancet', 'ricochet']), mult: 1.5, why: 'the tip decides the impact' },
+};
+const HILT_BASE_BONUS = 1.2;
 
 const COUNT_MODS = new Set(['twinspar', 'prismite', 'echo-opal', 'seedstone']);
 const ARCANE_COLOR = '#c9b8ff';
@@ -103,14 +116,14 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
   const stats = wandStats(build);
   const shaftId = stats.parts.shaft.id;
   const se = stats.shaftEffect;
-  const ce = stats.capEffect;
-  const ge = stats.gripEffect;
+  const ce = stats.tipEffect;
+  const ge = stats.hiltEffect;
   const trace: string[] = [];
   const warnings: string[] = [];
 
   // ---------- 1. Draw / 2. Seed ----------
   trace.push(
-    `Seed: ${stats.form.name}: ${stats.parts.grip ? `${stats.parts.grip.name} grip` : 'no grip'}, ${stats.parts.shaft.name} shaft, ${stats.parts.cap ? `${stats.parts.cap.name} cap` : 'no cap'}. ` +
+    `Seed: ${stats.form.name}: ${stats.parts.hilt ? `${stats.parts.hilt.name} hilt` : 'no hilt'}, ${stats.parts.shaft.name} shaft, ${stats.parts.tip ? `${stats.parts.tip.name} tip` : 'no tip'}. ` +
       `Power ${stats.basePower}, Conductivity ${stats.conductivity} (boosts keep ${pct(stats.fadePerStep)} per step), Heat limit ${stats.heatLimit}.`,
   );
 
@@ -118,7 +131,7 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
   const slots = build.spine.slice(0, stats.sockets);
   if (build.spine.filter(Boolean).length > slots.filter(Boolean).length) warnings.push(`This ${stats.form.name.toLowerCase()} has ${stats.sockets} sockets; extra crystals ignored.`);
 
-  const entryAt: (Entry | null)[] = slots.map((slot, i) => (slot ? makeEntry(slot, i, se) : null));
+  const entryAt: (Entry | null)[] = slots.map((slot, i) => (slot ? makeEntry(slot, i, se, zoneOf(stats, i)) : null));
   let entries: Entry[] = entryAt.filter((e): e is Entry => e !== null);
 
   // ---------- 3. Halo pass (flank sockets) ----------
@@ -142,9 +155,11 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
     const halo: Halo = { def, q: qualityDef(slot.quality).strength * modifierBonus(def, se), gap };
     const left = entryAt[gap];
     const right = entryAt[gap + 1];
+    const beyond = entryAt[gap + 2];
     if (left) left.halos.push(halo);
     if (right) right.halos.push(halo);
-    trace.push(`Halo: ${def.name} in flank ${gap + 1} tints S${gap + 1} and S${gap + 2}.`);
+    if (beyond) beyond.halos.push({ ...halo, q: halo.q * 0.5, far: true });
+    trace.push(`Side slot: ${def.name} tints S${gap + 1} and S${gap + 2}${gap + 2 < stats.sockets ? `, and S${gap + 3} at half strength` : ''}.`);
   }
 
   // Inverter: reverse everything downstream of it (left to right).
@@ -244,7 +259,8 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
     const def = e.def;
     const q = e.q;
     const fade = fadeAt(i);
-    const label = `S${e.spineIndex + 1} ${def.name}${e.qualityName !== 'Clear' ? ` (${e.qualityName})` : ''}`;
+    const label = `${e.zone[0].toUpperCase() + e.zone.slice(1)} S${e.spineIndex + 1} ${def.name}${e.qualityName !== 'Clear' ? ` (${e.qualityName})` : ''}`;
+    if (ZONE_BOOST[e.zone].ids.has(def.id)) trace.push(`${label}: x${ZONE_BOOST[e.zone].mult} because ${ZONE_BOOST[e.zone].why}.`);
     drain += Math.max(0, def.drain - (se.drainReduce ?? 0)) * count;
     heat += def.heat;
     if (def.element === 'fire' && se.fireHeat) heat += se.fireHeat;
@@ -252,9 +268,11 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
     if (def.kind === 'element' && def.element) {
       const el = def.element;
       const elDef = ELEMENTS[el];
+      // each element answers to the material of the zone it sits in
+      const zoneMat: Material = (e.zone === 'hilt' ? stats.parts.hilt : e.zone === 'tip' ? stats.parts.tip : null) ?? stats.parts.shaft;
       let mood = 1;
-      if (elDef.harmony.includes(shaftId)) mood = 1.25;
-      else if (elDef.clash.includes(shaftId)) {
+      if (elDef.harmony.includes(zoneMat.id)) mood = 1.25;
+      else if (elDef.clash.includes(zoneMat.id)) {
         mood = 0.8;
         heat += 1;
         byproducts.add(elDef.byproduct.name);
@@ -262,7 +280,9 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
       }
       const dragon = se.fireDouble && el === 'fire' ? 2 : 1;
       const boost = se.elementBoost?.[el] ?? 1;
-      const add = (def.power ?? 10) * q * mood * fade * dragon * boost;
+      const base = e.zone === 'hilt' ? HILT_BASE_BONUS : 1;
+      const add = (def.power ?? 10) * q * mood * fade * dragon * boost * base;
+      if (base !== 1) trace.push(`${label}: in the hilt it sets the base (x${HILT_BASE_BONUS}).`);
       const prev = i > 0 ? entries[i - 1] : null;
       const adjacentPrev =
         !!lastElement &&
@@ -270,12 +290,12 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
           // non-adjacent elements within 2 sockets react when a Catalyst is near (but never across a Null Stone)
           (catalystNear(i, e) && lastElement.pos >= i - 2 && !(prev && prev.def.id === 'null')));
       const catalyzed = adjacentPrev && catalystNear(i, e);
-      if (mood !== 1) trace.push(`${label}: ${mood > 1 ? 'harmony' : 'clash'} with ${stats.parts.shaft.name} (x${mood})${mood < 1 ? `, +1 Heat, ${elDef.byproduct.name} added` : ''}.`);
+      if (mood !== 1) trace.push(`${label}: ${mood > 1 ? 'harmony' : 'clash'} with the ${zoneMat.name} ${e.zone} (x${mood})${mood < 1 ? `, +1 Heat, ${elDef.byproduct.name} added` : ''}.`);
       applyElement(el, add, i, label, catalyzed, adjacentPrev);
 
       // An element tint from a flank fuses with this crystal (this crystal is the core).
       for (const h of e.halos) {
-        if (h.def.kind === 'element' && h.def.element) {
+        if (h.def.kind === 'element' && h.def.element && !h.far) {
           const tint = h.def.element;
           const r = current ? SECOND_ORDER[`${(current as Reaction).id}>${tint}`] ?? null : reactionFor(el, tint);
           if (r) {
@@ -452,7 +472,7 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
     trace.push(`Feedback: ${loops} loop(s) at ${pct(loopStrength)}, power x${(1 + extra).toFixed(2)}, +${loopHeat} Heat.`);
   }
 
-  // ---------- Form, shaft and cap finish the shot ----------
+  // ---------- Form, shaft and tip finish the shot ----------
   if (stats.form.powerMult !== 1) {
     power *= stats.form.powerMult;
     trace.push(`${stats.form.name}: power x${stats.form.powerMult}.`);
@@ -461,20 +481,20 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
     power *= se.powerMult;
     trace.push(`${stats.parts.shaft.name} shaft: power x${se.powerMult}.`);
   }
-  const capName = stats.parts.cap ? `${stats.parts.cap.name} cap` : '';
+  const tipName = stats.parts.tip ? `${stats.parts.tip.name} tip` : '';
   if (ce.fireBoost && tags.includes('fire')) {
     power *= ce.fireBoost;
-    trace.push(`${capName}: Fire shots x${ce.fireBoost}.`);
+    trace.push(`${tipName}: Fire shots x${ce.fireBoost}.`);
   }
   if (ce.nightPower) {
     const m = env.time === 'night' ? 1.5 : 0.75;
     power *= m;
-    trace.push(`${capName}: x${m} at ${env.time === 'night' ? 'night' : 'day'}.`);
+    trace.push(`${tipName}: x${m} at ${env.time === 'night' ? 'night' : 'day'}.`);
   }
   if (ce.heavy) {
     power *= 1.1;
     size *= 1.3;
-    trace.push(`${capName}: heavier shot, x1.1 power.`);
+    trace.push(`${tipName}: heavier shot, x1.1 power.`);
   }
   if (ce.crit) critChance += ce.crit;
   if (ce.pierceBonus) pierce += ce.pierceBonus;
@@ -484,7 +504,7 @@ export function resolveShot(build: WandBuild, env: Env = DEFAULT_ENV): Shot {
   if (ce.freeze && tags.includes('water')) {
     effects.add('root');
     effects.add('freeze');
-    trace.push(`${capName}: Water freezes targets in place.`);
+    trace.push(`${tipName}: Water freezes targets in place.`);
   }
   if (ge.steady) spreadDeg *= ge.steady;
   const sideCopies = ce.sideCopies ?? 0;
@@ -549,12 +569,13 @@ function modifierBonus(def: Crystal, se: PartEffect): number {
   return def.kind === 'modifier' ? se.modifierBoost ?? 1 : 1;
 }
 
-function makeEntry(slot: CrystalSlot, index: number, se: PartEffect): Entry {
+function makeEntry(slot: CrystalSlot, index: number, se: PartEffect, zone: Zone): Entry {
   const def = crystalDef(slot.id);
   const qd = qualityDef(slot.quality);
   let q = qd.strength * modifierBonus(def, se);
   if (se.knot && index === 1) q *= 2; // the knot socket
-  return { def, q, qualityName: qd.name, spineIndex: index, halos: [] };
+  if (ZONE_BOOST[zone].ids.has(def.id)) q *= ZONE_BOOST[zone].mult;
+  return { def, q, qualityName: qd.name, spineIndex: index, zone, halos: [] };
 }
 
 /** Damage multiplier of a shot against a target category, including immunities. */

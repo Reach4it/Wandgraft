@@ -1,5 +1,5 @@
 {
- "_note": "Wand body materials. P/C/R/S/Cn on a 1-10 scale (Potency, Capacity, Recharge, Stability, Conductivity). Each material can be a grip, shaft or cap and does something different in each: the grip sets draw sources (drawMix), capacity and recharge; the shaft sets sockets, flanks, conductivity, stability and element harmony; the cap sets potency, speed and bite. bite = damage multiplier by target category, applied when the material is the cap. grip/shaft/cap.effect keys are read by the engine and lab.",
+ "_note": "Wand body materials. P/C/R/S/Cn on a 1-10 scale (Potency, Capacity, Recharge, Stability, Conductivity). Each material can be a hilt, shaft or tip and does something different in each: the hilt sets draw sources (drawMix), capacity and recharge; the shaft sets sockets, flanks, conductivity, stability and element harmony; the tip sets potency, speed and bite. bite = damage multiplier by target category, applied when the material is the tip. hilt/shaft/tip.effect keys are read by the engine and lab.",
  "families": {
   "wood": {
    "velocity": 1.0,
@@ -49,7 +49,7 @@
     "wielder": 0.3,
     "moon": 0.1
    },
-   "grip": {
+   "hilt": {
     "perk": "Steady in the hand: shots spread 30% less.",
     "effect": {
      "steady": 0.7
@@ -64,7 +64,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Bends: shots curve gently toward where you aim.",
     "effect": {
      "steer": 1
@@ -92,8 +92,8 @@
     "ground": 0.5,
     "wielder": 0.5
    },
-   "grip": {
-    "perk": "Solid grip: +20% capacity.",
+   "hilt": {
+    "perk": "Solid hilt: +20% capacity.",
     "effect": {
      "capacity": 1.2
     }
@@ -105,7 +105,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Blunt knob: hits knock targets back.",
     "effect": {
      "addEffects": [
@@ -134,7 +134,7 @@
     "kills": 0.7,
     "wielder": 0.3
    },
-   "grip": {
+   "hilt": {
     "perk": "Graveyard wood: each kill refills a burst of charge.",
     "effect": {
      "killRefill": 0.5
@@ -147,7 +147,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Bites the dead: Spirit and undead take 50% more.",
     "effect": {}
    }
@@ -174,7 +174,7 @@
     "sun": 0.3,
     "wielder": 0.2
    },
-   "grip": {
+   "hilt": {
     "perk": "Warm resin: charges near fire and in sunlight.",
     "effect": {}
    },
@@ -185,7 +185,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Smoldering tip: every hit sets the target burning.",
     "effect": {
      "addEffects": [
@@ -215,7 +215,7 @@
     "motion": 0.6,
     "wind": 0.4
    },
-   "grip": {
+   "hilt": {
     "perk": "Light: charges while you move.",
     "effect": {}
    },
@@ -224,7 +224,7 @@
     "effect": {},
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Whistling tip: +20% shot speed.",
     "effect": {
      "speed": 1.2
@@ -248,7 +248,7 @@
    "drawMix": {
     "wielder": 1
    },
-   "grip": {
+   "hilt": {
     "perk": "Plain wood: charges only from you.",
     "effect": {}
    },
@@ -259,7 +259,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Plain tip.",
     "effect": {}
    }
@@ -284,7 +284,7 @@
     "storm": 0.5,
     "wielder": 0.5
    },
-   "grip": {
+   "hilt": {
     "perk": "Conducts the sky: charges fast in storms.",
     "effect": {}
    },
@@ -295,7 +295,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Conductive tip: chains jump 1 more time; hits metal 40% harder.",
     "effect": {
      "chainBonus": 1
@@ -323,7 +323,7 @@
     "wielder": 0.7,
     "still": 0.3
    },
-   "grip": {
+   "hilt": {
     "perk": "Cold weight: charges from you, faster when still.",
     "effect": {}
    },
@@ -334,7 +334,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Ward-breaker: double damage to magic wards.",
     "effect": {}
    }
@@ -359,7 +359,7 @@
     "moon": 0.6,
     "wielder": 0.4
    },
-   "grip": {
+   "hilt": {
     "perk": "Moon-drawn: charges best at night.",
     "effect": {}
    },
@@ -373,7 +373,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Moon tip: +50% power at night, −25% by day. Bites the undead.",
     "effect": {
      "nightPower": 1
@@ -400,7 +400,7 @@
     "sun": 0.7,
     "still": 0.3
    },
-   "grip": {
+   "hilt": {
     "perk": "Hoarder: +50% capacity, slow refill.",
     "effect": {
      "capacity": 1.5
@@ -413,7 +413,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Gilded tip: wards take 40% more.",
     "effect": {}
    }
@@ -443,7 +443,7 @@
     "sky": 0.8,
     "wielder": 0.2
    },
-   "grip": {
+   "hilt": {
     "perk": "Fallen star: charges under the night sky.",
     "effect": {}
    },
@@ -452,7 +452,7 @@
     "effect": {},
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Star tip: +10% against everything.",
     "effect": {}
    }
@@ -476,7 +476,7 @@
    "drawMix": {
     "wielder": 1
    },
-   "grip": {
+   "hilt": {
     "perk": "Cold, heavy liquid: charges only from you.",
     "effect": {}
    },
@@ -485,7 +485,7 @@
     "effect": {},
     "lab": false
    },
-   "cap": {
+   "tip": {
     "perk": "Slick tip: shots pierce 1 more target.",
     "effect": {
      "pierceBonus": 1
@@ -512,8 +512,8 @@
     "fire": 0.4,
     "wielder": 0.6
    },
-   "grip": {
-    "perk": "Sharp grip: charges near fire.",
+   "hilt": {
+    "perk": "Sharp hilt: charges near fire.",
     "effect": {}
    },
    "shaft": {
@@ -523,7 +523,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Glass edge: +15% critical chance.",
     "effect": {
      "crit": 0.15
@@ -550,7 +550,7 @@
     "still": 0.8,
     "wielder": 0.2
    },
-   "grip": {
+   "hilt": {
     "perk": "Roots you: fast recharge standing still, almost none while moving.",
     "effect": {}
    },
@@ -561,7 +561,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Heavy tip: shots are 30% bigger, 20% slower, 10% stronger.",
     "effect": {
      "heavy": 1
@@ -588,7 +588,7 @@
     "ground": 0.5,
     "wielder": 0.5
    },
-   "grip": {
+   "hilt": {
     "perk": "Grounded: charges steadily from the earth.",
     "effect": {}
    },
@@ -601,7 +601,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Magnetic tip: shots curve toward armored targets.",
     "effect": {
      "magnet": 1
@@ -629,8 +629,8 @@
    "drawMix": {
     "wielder": 1
    },
-   "grip": {
-    "perk": "Starter grip: charges only from you.",
+   "hilt": {
+    "perk": "Starter hilt: charges only from you.",
     "effect": {}
    },
    "shaft": {
@@ -640,7 +640,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Marking tip: hits chalk-mark the target; later shots curve toward marks.",
     "effect": {
      "mark": 1
@@ -667,7 +667,7 @@
     "ground": 0.6,
     "wielder": 0.4
    },
-   "grip": {
+   "hilt": {
     "perk": "Earth-hollow: charges from the ground.",
     "effect": {}
    },
@@ -676,7 +676,7 @@
     "effect": {},
     "lab": false
    },
-   "cap": {
+   "tip": {
     "perk": "Crystal-lined tip: stone takes 40% more.",
     "effect": {}
    }
@@ -702,7 +702,7 @@
     "allies": 0.4,
     "wielder": 0.2
    },
-   "grip": {
+   "hilt": {
     "perk": "Pack: +15% recharge per ally nearby (no allies in the lab); kills refill charge.",
     "effect": {
      "killRefill": 0.3
@@ -718,7 +718,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Fang tip: +10% critical chance.",
     "effect": {
      "crit": 0.1
@@ -746,7 +746,7 @@
     "motion": 0.6,
     "wind": 0.4
    },
-   "grip": {
+   "hilt": {
     "perk": "Light as a feather: charges while you move.",
     "effect": {}
    },
@@ -759,7 +759,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Featherlight tip: the fastest shots in the game.",
     "effect": {}
    }
@@ -784,7 +784,7 @@
     "water": 0.7,
     "wielder": 0.3
    },
-   "grip": {
+   "hilt": {
     "perk": "Sea-born: charges in rain.",
     "effect": {}
    },
@@ -797,7 +797,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Deep pulse: hits knock targets back.",
     "effect": {
      "addEffects": [
@@ -826,7 +826,7 @@
     "growth": 0.5,
     "wielder": 0.5
    },
-   "grip": {
+   "hilt": {
     "perk": "Living bone: charges from growing things, best in rain.",
     "effect": {}
    },
@@ -835,7 +835,7 @@
     "effect": {},
     "lab": false
    },
-   "cap": {
+   "tip": {
     "perk": "Branching tip: hits split into 2 small shards.",
     "effect": {
      "seeds": 2
@@ -868,7 +868,7 @@
     "kills": 0.3,
     "wielder": 0.2
    },
-   "grip": {
+   "hilt": {
     "perk": "Dragon's hold: kills refill charge.",
     "effect": {
      "killRefill": 0.4
@@ -881,7 +881,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Dragon's mouth: +20% against everything, Fire shots +20%.",
     "effect": {
      "fireBoost": 1.2
@@ -907,7 +907,7 @@
    "drawMix": {
     "calm": 1
    },
-   "grip": {
+   "hilt": {
     "perk": "Calm relic: charges only while you stand still.",
     "effect": {}
    },
@@ -918,7 +918,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Relic tip: Spirit and undead take double.",
     "effect": {}
    }
@@ -943,7 +943,7 @@
     "sun": 0.5,
     "wielder": 0.5
    },
-   "grip": {
+   "hilt": {
     "perk": "Sun-clear: charges in daylight.",
     "effect": {}
    },
@@ -954,7 +954,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Clear tip: wards take 40% more.",
     "effect": {}
    }
@@ -978,7 +978,7 @@
    "drawMix": {
     "wielder": 1
    },
-   "grip": {
+   "hilt": {
     "perk": "Calm stone: overload backlash is halved.",
     "effect": {
      "calm": 0.5
@@ -991,7 +991,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Violet tip: spirits take 30% more.",
     "effect": {}
    }
@@ -1016,7 +1016,7 @@
     "sun": 0.8,
     "wielder": 0.2
    },
-   "grip": {
+   "hilt": {
     "perk": "Sun-catcher: charges in bright daylight.",
     "effect": {}
    },
@@ -1027,7 +1027,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Prism tip: every shot also splits a weak copy off each side.",
     "effect": {
      "sideCopies": 2
@@ -1054,7 +1054,7 @@
     "cold": 0.7,
     "wielder": 0.3
    },
-   "grip": {
+   "hilt": {
     "perk": "Cold-drawn: charges at night and in rain.",
     "effect": {}
    },
@@ -1065,7 +1065,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Frost tip: Water shots freeze targets in place.",
     "effect": {
      "freeze": 1
@@ -1091,7 +1091,7 @@
    "drawMix": {
     "wielder": 1
    },
-   "grip": {
+   "hilt": {
     "perk": "Purifying: charges only from you.",
     "effect": {}
    },
@@ -1100,7 +1100,7 @@
     "effect": {},
     "lab": false
    },
-   "cap": {
+   "tip": {
     "perk": "Salt tip: spirits and undead take 50% more.",
     "effect": {}
    }
@@ -1125,7 +1125,7 @@
     "seawater": 0.8,
     "wielder": 0.2
    },
-   "grip": {
+   "hilt": {
     "perk": "Sea-hungry: barely charges away from the sea.",
     "effect": {}
    },
@@ -1134,7 +1134,7 @@
     "effect": {},
     "lab": false
    },
-   "cap": {
+   "tip": {
     "perk": "Wet tip: every hit soaks the target.",
     "effect": {
      "addEffects": [
@@ -1163,7 +1163,7 @@
     "sun": 0.5,
     "wielder": 0.5
    },
-   "grip": {
+   "hilt": {
     "perk": "Warm resin: charges in daylight.",
     "effect": {}
    },
@@ -1172,7 +1172,7 @@
     "effect": {},
     "lab": false
    },
-   "cap": {
+   "tip": {
     "perk": "Memory tip: every 5th shot fires twice for free.",
     "effect": {
      "replay": 5
@@ -1199,7 +1199,7 @@
     "water": 0.5,
     "wielder": 0.5
    },
-   "grip": {
+   "hilt": {
     "perk": "Sea-shell: charges in rain.",
     "effect": {}
    },
@@ -1210,7 +1210,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Spiral tip: shots corkscrew and bounce 1 more time.",
     "effect": {
      "bounceBonus": 1
@@ -1236,7 +1236,7 @@
    "drawMix": {
     "blood": 1
    },
-   "grip": {
+   "hilt": {
     "perk": "Feeds on blood: fast recharge, paid in your health.",
     "effect": {
      "blood": 1
@@ -1249,7 +1249,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Barbed tip: hits make targets bleed.",
     "effect": {
      "addEffects": [
@@ -1278,7 +1278,7 @@
     "storm": 0.9,
     "wielder": 0.1
    },
-   "grip": {
+   "hilt": {
     "perk": "Lightning glass: barely charges outside storms.",
     "effect": {}
    },
@@ -1289,7 +1289,7 @@
     },
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Lightning tip: chains jump 1 more time.",
     "effect": {
      "chainBonus": 1
@@ -1315,7 +1315,7 @@
    "drawMix": {
     "sleep": 1
    },
-   "grip": {
+   "hilt": {
     "perk": "Dream-drawn: charges while you rest (slowly in the lab).",
     "effect": {}
    },
@@ -1324,7 +1324,7 @@
     "effect": {},
     "lab": true
    },
-   "cap": {
+   "tip": {
     "perk": "Dream tip: spirits take 30% more.",
     "effect": {}
    }

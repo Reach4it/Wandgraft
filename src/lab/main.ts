@@ -3,6 +3,7 @@ import { mountBench, renderBench, wireBench } from './bench';
 import { renderSide, wireSide } from './side';
 import { onChange, state } from './state';
 import { World } from './world';
+import { mountTutorial } from './tutorial';
 
 const bench = document.getElementById('bench')!;
 const side = document.getElementById('side')!;
@@ -36,6 +37,7 @@ wireBench(bench);
 wireSide(side, () => world.reset());
 onChange(render);
 render();
+mountTutorial();
 world.start();
 // handy for poking at the lab from the browser console
 (window as unknown as { lab: World }).lab = world;

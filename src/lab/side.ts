@@ -1,4 +1,4 @@
-// Right-hand panel: dummies on the range, sandbox controls and the damage log.
+// Right-hand panel: the tutorial, dummies on the range, time and weather, sandbox controls and the damage log.
 import { DUMMIES } from '../engine/data';
 import { LabState, emit, setEnv, state } from './state';
 
@@ -7,7 +7,7 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};
 export function renderSide(root: HTMLElement, s: LabState) {
   let controls = root.querySelector<HTMLElement>('#side-controls');
   if (!controls) {
-    root.innerHTML = `<div id="side-controls"></div>
+    root.innerHTML = `<section class="block" id="tutorial" aria-live="polite"></section><div id="side-controls"></div>
       <section class="block log-block">
         <div class="log-head"><h2 class="block-title">Damage log</h2><button id="clear-log" class="ghost small">Clear</button></div>
         <ol id="log" aria-live="off"><li class="empty">Hits show up here: reaction, damage, and why.</li></ol>
@@ -28,7 +28,7 @@ export function renderSide(root: HTMLElement, s: LabState) {
     </section>
     <section class="block">
       <h2 class="block-title">Time and weather</h2>
-      <p class="help">Grips charge from different sources: sun, moon, rain, storms. Try a Silver cap at night.</p>
+      <p class="help">Hilts charge from different sources: sun, moon, rain, storms. Try a Silver tip at night.</p>
       <div class="seg" role="group" aria-label="Time of day">
         ${(['day', 'night'] as const).map((t) => `<button class="q ${s.env.time === t ? 'on' : ''}" data-time="${t}" aria-pressed="${s.env.time === t}">${t === 'day' ? 'Day' : 'Night'}</button>`).join('')}
       </div>

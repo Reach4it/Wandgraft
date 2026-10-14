@@ -12,7 +12,7 @@ export type Family = 'wood' | 'metal' | 'stone' | 'bone' | 'crystal' | 'exotic';
 
 /** Effect keys a part can carry; read by the engine (and a few by the lab's range). */
 export interface PartEffect {
-  // grip
+  // hilt
   steady?: number; // spread multiplier
   capacity?: number; // capacity multiplier
   killRefill?: number; // fraction of max charge refilled on a kill (scaled by the kills share)
@@ -35,7 +35,7 @@ export interface PartEffect {
   spiral?: number;
   powerMult?: number;
   reactionBoost?: number;
-  // cap
+  // tip
   steer?: number;
   addEffects?: string[];
   speed?: number;
@@ -73,23 +73,25 @@ export interface Material {
   tempo?: number;
   color: string;
   drawMix: Record<string, number>;
-  grip: PartRole;
+  hilt: PartRole;
   shaft: PartRole;
-  cap: PartRole;
+  tip: PartRole;
 }
 
-export type FormId = 'twig' | 'wand' | 'grafted' | 'master' | 'staff';
+export type FormId = 'twig' | 'wand' | 'grafted' | 'master' | 'archwand';
+export type Zone = 'hilt' | 'shaft' | 'tip';
 
 export interface WandForm {
   id: FormId;
   name: string;
-  parts: ('grip' | 'shaft' | 'cap')[];
-  maxSockets: number;
-  socketBonus: number;
+  parts: Zone[];
+  hiltSockets: number;
+  shaftMax: number;
+  shaftBonus: number;
+  tipSockets: number;
   flanks: 'none' | 'one' | 'full';
   powerMult: number;
   tempoMult: number;
-  twoHanded: boolean;
   text: string;
 }
 
@@ -148,10 +150,12 @@ export interface Preset {
   group: string;
   form: FormId;
   note?: string;
-  grip: string | null;
+  hilt: string | null;
   shaft: string;
-  cap: string | null;
-  spine: (string | null)[];
+  tip: string | null;
+  doc?: boolean;
+  /** Crystals by zone, in chain order. */
+  crystals: Partial<Record<Zone, (string | null)[]>>;
   flanks: Record<string, string>;
 }
 

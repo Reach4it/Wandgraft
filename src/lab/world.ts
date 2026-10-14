@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { DUMMIES, DummyDef, ELEMENTS, ElementId, material } from '../engine/data';
 import { Shot, damageMultiplier } from '../engine/resolve';
 import { HEAT_COOLING_PER_SECOND, makeRng, rollOverload } from '../engine/overload';
-import { emit, state } from './state';
+import { emit, signal, state } from './state';
 import { buildWandModel } from './wandModel';
 import { drawReport } from '../engine/wand';
 import { logLine } from './side';
@@ -390,17 +390,12 @@ export class World {
   }
 
   /** Called when the wand changes. */
-  /** Put the built wand (or staff) in the player's hand. */
+  /** Put the built wand in the player's hand. */
   private refreshWand() {
     this.wandHolder.clear();
     const model = buildWandModel(state.build, state.shot, this.glowTex);
     const scale = 1.25;
     model.group.scale.setScalar(scale);
-    if (state.shot.stats.form.twoHanded) {
-      // a staff is held upright-ish, planted beside the wizard
-      model.group.rotation.z = 1.1;
-      model.group.position.set(-0.25, -1.0, 0);
-    }
     this.wandHolder.add(model.group);
   }
 
@@ -512,6 +507,7 @@ export class World {
       const o = rollOverload(this.heat - limit, this.rng, stats.shaftEffect, shot.backlashMult);
       this.heat = limit * 0.5;
       toast(`${o.title} ${o.text}`, 'alert', 2600);
+      signal({ type: 'overload', kind: o.kind });
       logLine(`<b>Overload: ${esc(o.title)}</b> ${esc(o.text)}`, 'overload');
       if (o.kind === 'fizzle') {
         this.puff(this.player.u, this.player.v, 1.2, '#888888', 14);
@@ -546,7 +542,7 @@ export class World {
     this.shotsFired++;
     if (shot.replayEvery && this.shotsFired % shot.replayEvery === 0) {
       this.pending.push({ at: this.time + 0.15, fn: () => volley(1, 'replay') });
-      logLine(`${esc(stats.parts.cap?.name ?? 'Cap')} remembers: this shot fires twice.`);
+      logLine(`${esc(stats.parts.tip?.name ?? 'Tip')} remembers: this shot fires twice.`);
     }
     for (let e = 1; e <= shot.echoes; e++) {
       this.pending.push({ at: this.time + 0.5 * e, fn: () => volley(Math.pow(0.6, e), 'echo') });
@@ -665,7 +661,10 @@ export class World {
         notes.push(`shell absorbed ${Math.round(amount * 0.75)}`);
         amount *= 0.25;
       }
-      if (d.shell === 0) notes.push('shell cracked');
+      if (d.shell === 0) {
+        notes.push('shell cracked');
+        signal({ type: 'shell', dummy: d.def.id });
+      }
     }
     d.hp -= amount;
     d.lastHit = this.time;
@@ -685,6 +684,7 @@ export class World {
     logLine(
       `${esc(shotName(shot))} → <b>${esc(name)}</b> <span class="dmg">${Math.round(amount)}</span>${notes.length ? ` <small>${esc(notes.join(', '))}</small>` : ''}`,
     );
+    signal({ type: 'hit', dummy: d.def.id, amount, tags: shot.tags });
     if (d.hp <= 0) this.breakDummy(d);
     return amount;
   }
@@ -708,12 +708,13 @@ export class World {
     d.respawnAt = this.time + 1.4;
     this.puff(d.u, d.v, 1.4, d.def.color, 26);
     logLine(`<b>${esc(d.def.name)}</b> broke. It rebuilds in a moment.`, 'kill');
-    // grips that feed on kills refill, shafts that feed on kills cool down
+    signal({ type: 'break', dummy: d.def.id });
+    // hilts that feed on kills refill, shafts that feed on kills cool down
     const st = state.shot.stats;
-    const refill = (st.gripEffect.killRefill ?? 0) * st.maxCharge;
+    const refill = (st.hiltEffect.killRefill ?? 0) * st.maxCharge;
     if (refill > 0) {
       this.charge = Math.min(st.maxCharge, this.charge + refill);
-      logLine(`${esc(st.parts.grip?.name ?? 'Grip')} grip drinks in the kill: +${Math.round(refill)} charge.`, 'kill');
+      logLine(`${esc(st.parts.hilt?.name ?? 'Hilt')} hilt drinks in the kill: +${Math.round(refill)} charge.`, 'kill');
     }
     if (st.shaftEffect.killCool) {
       this.heat = Math.max(0, this.heat - st.shaftEffect.killCool);
@@ -892,7 +893,7 @@ export class World {
     this.playerGroup.position.y = this.player.hurt > 0 ? Math.sin(this.time * 60) * 0.05 : 0;
 
     // charge and heat
-    // recharge flows from the grip's draw sources, scaled by time, weather and whether you're moving
+    // recharge flows from the hilt's draw sources, scaled by time, weather and whether you're moving
     this.drawNow = drawReport(stats, state.env, this.player.moving).mult;
     this.charge = Math.min(stats.maxCharge, this.charge + stats.chargePerSecond * shot.rechargeMult * this.drawNow * dt);
 
@@ -956,7 +957,7 @@ export class World {
           alive = false;
         }
       } else {
-        // gentle pulls from the cap: toward your aim (Willow), toward armor (Lodestone), toward chalk marks (Chalk)
+        // gentle pulls from the tip: toward your aim (Willow), toward armor (Lodestone), toward chalk marks (Chalk)
         if (!p.homing && p.life < 2.55) {
           let pull: { u: number; v: number } | null = null;
           if (p.shot.mark) {
@@ -1200,7 +1201,7 @@ export class World {
       const k = state.sandbox.infiniteCharge ? 1 : this.charge / st.maxCharge;
       (cm.querySelector('.bar i') as HTMLElement).style.width = `${k * 100}%`;
       cm.querySelector('.meter-value')!.textContent = state.sandbox.infiniteCharge ? 'infinite' : `${Math.floor(this.charge)} / ${st.maxCharge}`;
-      cm.title = `Refilling at ${Math.round(this.drawNow * 100)}% speed from the grip's draw sources.`;
+      cm.title = `Refilling at ${Math.round(this.drawNow * 100)}% speed from the hilt's draw sources.`;
       cm.classList.toggle('low', !state.sandbox.infiniteCharge && this.charge < state.shot.drain);
     }
     if (hm) {

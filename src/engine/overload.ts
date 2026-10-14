@@ -35,7 +35,7 @@ export function makeRng(seed = 1): () => number {
 /**
  * Roll the overload table. The further over the limit, the likelier the bad (and wild) results.
  * The shaft can change the outcome (Emberpine: fire bursts instead of misfires; Obsidian: always cracks),
- * and the grip can soften backlash (Amethyst).
+ * and the hilt can soften backlash (Amethyst).
  */
 export function rollOverload(excess: number, rng: () => number, shaftEffect: PartEffect = {}, backlashMult = 1): Overload {
   const push = Math.min(0.25, excess * 0.03);

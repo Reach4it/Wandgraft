@@ -3,7 +3,7 @@
 import { DUMMIES } from '../engine/data';
 import { preset } from '../engine/presets';
 import { Shot, resolveShot } from '../engine/resolve';
-import { DEFAULT_ENV, Env, WandBuild, refit } from '../engine/wand';
+import { DEFAULT_ENV, Env, WandBuild, emptyBuild, refit } from '../engine/wand';
 
 export interface Sandbox {
   infiniteCharge: boolean;
@@ -30,7 +30,15 @@ export interface LabState {
 type Listener = (s: LabState) => void;
 const listeners: Listener[] = [];
 
-const startBuild = preset('spark');
+// A new wandwright starts the tutorial with a bare, empty Chalk twig; anyone who has finished it gets a sample.
+function tutorialDone(): boolean {
+  try {
+    return Number(localStorage.getItem('wandgraft.tutorial.v1') ?? '0') >= 11;
+  } catch {
+    return false;
+  }
+}
+const startBuild = tutorialDone() ? preset('spark') : emptyBuild('twig', null, 'chalk', null);
 
 export const state: LabState = {
   build: startBuild,
@@ -57,9 +65,12 @@ export function emit() {
   for (const fn of listeners) fn(state);
 }
 
-/** Replace the wand (fitted to its form) and re-resolve its shot. */
-export function setBuild(build: WandBuild) {
-  state.build = refit(build);
+/**
+ * Replace the wand (fitted to its form) and re-resolve its shot. keepZones: the build is an
+ * edit of the current wand, so crystals stay in their hilt, shaft or tip zone if the zones resize.
+ */
+export function setBuild(build: WandBuild, keepZones = false) {
+  state.build = refit(build, keepZones ? state.build : undefined);
   state.shot = resolveShot(state.build, state.env);
   state.stabilityLoss = 0;
   emit();
@@ -71,8 +82,23 @@ export function setEnv(env: Partial<Env>) {
   emit();
 }
 
+// ---- Range events (hits, breaks, overloads) for the tutorial ----
+export type LabEvent =
+  | { type: 'hit'; dummy: string; amount: number; tags: string[] }
+  | { type: 'shell'; dummy: string }
+  | { type: 'break'; dummy: string }
+  | { type: 'overload'; kind: string };
+
+const eventListeners: ((e: LabEvent) => void)[] = [];
+export function onLabEvent(fn: (e: LabEvent) => void) {
+  eventListeners.push(fn);
+}
+export function signal(e: LabEvent) {
+  for (const fn of eventListeners) fn(e);
+}
+
 // ---- Saved builds (per browser; the lab works fine if storage is unavailable) ----
-const KEY = 'wandgraft.blueprints.v2';
+const KEY = 'wandgraft.blueprints.v3';
 
 export function loadBlueprints(): Record<string, WandBuild> {
   try {

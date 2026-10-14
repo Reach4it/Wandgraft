@@ -1,10 +1,10 @@
-# Wandgraft — Wand & Crystal System
+# wandGraft — Wand & Crystal System
 
 Oct 12, 2026 · @Lord Berg
 
-## The name: Wandgraft
+## The name: wandGraft
 
-The working title is **Wandgraft**: you don't just hold a wand, you graft crystals into it, and the wand becomes whatever you build. Web searches for "Wandgraft" turned up no game, studio or product using it.
+The working title is **wandGraft**: you don't just hold a wand, you graft crystals into it, and the wand becomes whatever you build. Web searches for "Wandgraft" turned up no game, studio or product using it.
 
 Nearby names that are taken, so steer clear of them:
 
@@ -36,37 +36,37 @@ The player's loop:
 3. Graft crystals into sockets. Order, adjacency and side (flank) sockets decide the output.
 4. Test-fire, watch what happens, rearrange. Discovery is the fun: the game never shows a full recipe list.
 
-The name comes from **grafting wand bodies**. A wand has three parts (grip, shaft, cap) and any wandwright can join different materials, such as a silver cap on a yew shaft. The grip sets the draw source, the shaft sets sockets and conductivity, and the cap sets what the shot bites hardest.
+The name comes from **grafting wand bodies**. A wand has three parts (hilt, shaft, tip) and any wandwright can join different materials, such as a silver tip on a yew shaft. The hilt sets the base and the draw source, the shaft shapes the flight and sets sockets and conductivity, and the tip sets the impact and what the shot bites hardest. Crystals sit in all three.
 
-## Wand forms and what each part does
+## Wand forms: hilt, shaft and tip
 
-A wand grows with its wizard: a beginner holds a bare twig with 2 crystals, and a master carries a grafted wand with 6 crystals or a staff with 7. The form decides which parts can be fitted and caps the sockets; the shaft material decides how many sockets it naturally has.
+A wand grows with its wizard, from a 2-socket twig to a 10-socket archwand. There are no staves: every wand is held in one hand, so the other hand stays free for a ward. Crystals sit in all three zones and flow as one chain: hilt, then shaft, then tip.
 
-| Form | Parts | Crystals (max) | Flanks | Notes |
-| --- | --- | --- | --- | --- |
-| Twig | Shaft only | 2 | None | Where everyone starts. ×0.85 power, slightly faster casts. Charge comes only from you. |
-| Wand | Grip + shaft | 3 | None | The grip decides where charge comes from. |
-| Grafted wand | Grip + shaft + cap | 4 | 1, if the shaft has room | The cap decides speed and what the shot bites. |
-| Master wand | Grip + shaft + cap | 6 | All the shaft allows | ×1.1 power. |
-| Staff | Grip + shaft + cap, two-handed | Shaft's sockets +2, up to 7 | All the shaft allows | ×1.25 power, slower casts, no off-hand ward. |
+| Form | Parts | Hilt sockets | Shaft sockets (max) | Tip sockets | Total | Side slots | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Twig | Shaft only | 0 | 2 | 0 | 2 | None | Where everyone starts. ×0.85 power. With no hilt, the first crystal sets the base. |
+| Wand | Hilt + shaft | 1 | 3 | 0 | 4 | None | The hilt sets the base and where charge comes from. |
+| Grafted wand | Hilt + shaft + tip | 1 | 4 | 1 | 6 | 1, if the shaft has room | The tip decides exit and impact. |
+| Master wand | Hilt + shaft + tip | 2 | 5 | 1 | 8 | All the shaft allows | ×1.1 power. |
+| Archwand | Hilt + shaft + tip | 2 | 6 | 2 | 10 | All the shaft allows | The rarest wands. ×1.2 power. |
 
-Sockets on a given wand = the shaft's natural sockets (+2 for a staff), capped by the form. A 6-socket Hollowreed shaft still only takes 2 crystals as a twig.
+Shaft sockets = the shaft material's natural sockets (+1 on a master wand, +2 on an archwand), capped by the form. Hilt and tip sockets come with the form once that part is fitted. Crystals are never locked in: you can move them between any sockets at any time.
 
-### What each part does
+### What each zone does
 
-Every material can be a grip, a shaft or a cap, and plays a different role in each slot.
+| Zone | Its job in the chain | Crystals that work harder here | The part's material decides |
+| --- | --- | --- | --- |
+| Hilt | Sets the base: an element here is the core of the spell (+20%) | Sunstone, Thriftstone, Wellspring, Siphon (×1.5) | Where charge comes from, capacity, recharge, the wielder's side |
+| Shaft | Shapes the shot in flight | Twinspar, Prismite, Swiftquartz, Bloatstone, Needlepoint, Seeker's Eye, Mortar, Echo Opal (×1.25) | Shaft sockets, side slots, conductivity, stability; most material quirks |
+| Tip | Decides what happens on exit and impact | Nova Pearl, Lingerite, Seedstone, Lancet, Ricochet (×1.5) | Potency, shot speed, bite (what it hits hardest) |
 
-| Part | Decides | Example: Prismglass in this slot |
-| --- | --- | --- |
-| Grip | Where charge comes from (draw sources), capacity, recharge, and the wielder's side (backlash, steadiness) | Charges in bright sunlight |
-| Shaft | Sockets, flank chance, conductivity, stability, element harmony and clash; most material quirks | Fragile glass: −1 Heat limit |
-| Cap | Potency, shot speed, bite (what it hits hardest), and how the shot leaves the wand | Every shot splits a weak copy off each side |
+Each element crystal answers to the material of the zone it sits in. Fire in an Emberpine hilt is in harmony; the same Fire in a Willow shaft clashes. So the same crystal gets stronger or weaker depending on where you put it.
 
-Stats blend across the parts, leaning on the part that owns them: Potency is 50% cap, Capacity and Recharge are 50% grip, Stability and Conductivity lean on the shaft. A missing part's share falls to the shaft.
+**Side slots.** Rare shafts have diamond side slots above the gap between two sockets. A crystal there tints the sockets on both sides at full strength, and the next socket toward the tip at half strength, so it touches 2 or 3 sockets.
 
-**Draw sources depend on conditions.** A grip's charge mix (for example Willow: rain and water 60%, you 30%, moonlight 10%) refills faster or slower with time of day, weather and whether you are moving. A Basalt grip barely charges while you run; a Silver cap hits 50% harder at night. The Wand Lab has day, night, rain and storm settings to test this.
+**Draw sources depend on conditions.** A hilt's charge mix (for example Willow: rain and water 60%, you 30%, moonlight 10%) refills faster or slower with time of day, weather and whether you are moving. A Basalt hilt barely charges while you run; a Silver tip hits 50% harder at night. The Wand Lab has day, night, rain and storm settings to test this.
 
-Every material's three roles are listed in the game data (src/data/materials.json) and shown on its part card in the Wand Lab.
+Stats blend across the parts, leaning on the part that owns them: Potency is 50% tip, Capacity and Recharge are 50% hilt, Stability and Conductivity lean on the shaft. A missing part's share falls to the shaft. Every material's three roles are in the game data (src/data/materials.json) and on its part card in the Wand Lab.
 
 ## Base wand stats
 
@@ -176,13 +176,13 @@ Charge always flows handle to tip, so a crystal can only change what is upstream
 
 | Socket | Where | Rarity | What it does |
 | --- | --- | --- | --- |
-| Spine | Along the shaft, numbered S1 (handle) to Sn (tip) | Every wand, 2–7 | Main chain; the packet passes through each in order |
-| Flank | On the side, between two spine sockets | 0–30% per gap, by material | Not in the chain; its crystal bleeds a halo into both neighbors |
+| Spine | Along the hilt, shaft and tip, numbered S1 (hilt end) to Sn (tip end) | Every wand, 2–10 | Main chain; the packet passes through each in order |
+| Flank | On the side, between two spine sockets | 0–30% per gap, by material | Not in the chain; its crystal tints both neighbors, and the next socket toward the tip at half strength |
 | Pommel | Butt of the handle | Uncommon | Affects only you and the reservoir: recharge source, backlash, self-buffs |
 | Ring | A band around the shaft | Very rare | Touches every spine crystal at 30% strength |
 | Knot / Hidden | Random spot (Knotwood, Geode) | Material-specific | Doubles its crystal's effect, or affects the whole chain |
 
-**Socket count by wand size:** twig 2, wand 3, grafted wand 4, master wand 6, staff 7 (see Wand forms). Sockets beyond a material's natural count can be carved, but each carved socket costs 1 Stability.
+**Socket count by wand size:** twig 2, wand 4, grafted wand 6, master wand 8, archwand 10 (see Wand forms). Sockets beyond a material's natural count can be carved, but each carved socket costs 1 Stability.
 
 ### Position roles along the spine
 
@@ -378,7 +378,7 @@ The same crystals in a different order make a different spell; these builds show
 
 ### Same crystals, two orders (Basalt wand)
 
-- **Earth → Twinspar → Fire:** two earth shards, then Fire coats each one at full strength. Result: two full Volcanic Lobs (Earth core, Fire coat) that arc and erupt. Costly: Fire's drain is paid twice.
+- **Earth → Twinspar → Fire:** two earth shards, then Fire coats each one at full strength. Twinspar sits between the two elements, so they never fuse: each copy carries Earth and Fire side by side. Costly: Fire's drain is paid twice.
 - **Earth → Fire → Twinspar:** one Volcanic Lob is built, then split. Result: two weaker Volcanic Lobs, much cheaper. Better for sustained fire; worse for burst.
 
 ### Scalding Lance (Willow, 4 sockets)
@@ -407,11 +407,11 @@ First try: Water → Water → Keystone → Water → Lingerite. Nothing special
 | --- | --- |
 | Crystal quality tiers | Yes: five tiers, see below |
 | Socket shapes | No: any crystal fits any socket |
-| Where parts come from | Everything is found in the world: crystals, grips, shafts, caps |
+| Where parts come from | Everything is found in the world: crystals, hilts, shafts, tips |
 | Where wands are crafted | Anywhere, from the inventory screen; no workbench needed |
 | Information shown | Full stats, and a live preview of the shot before you fire |
 | Progression | Wands both level up and attune |
-| Grafting | Available from the start: every wand is grip + shaft + cap |
+| Grafting | Available from the start: every wand is hilt + shaft + tip |
 
 ### Crystal quality tiers
 
@@ -431,7 +431,7 @@ Levels belong to the wand's parts and are permanent; attunement belongs to the c
 
 |  | Wand level | Attunement |
 | --- | --- | --- |
-| Belongs to | Each part (grip, shaft, cap) separately | The current crystal layout |
+| Belongs to | Each part (hilt, shaft, tip) separately | The current crystal layout |
 | Earned by | Damage dealt and kills with that wand | Shots fired with the same layout |
 | Range | Levels 1–30 per part | 3 levels (about 200, 600, 1,500 shots) |
 | Rewards | Part points to spend on that part's traits | +10% power and −1 Heat per level |
@@ -439,11 +439,11 @@ Levels belong to the wand's parts and are permanent; attunement belongs to the c
 
 **Part points.** Each level gives one point to spend on that part's own small trait tree:
 
-- **Grip** — draw source mix (shift 10% toward a source you choose), reservoir size, backlash reduction.
+- **Hilt** — draw source mix (shift 10% toward a source you choose), reservoir size, backlash reduction.
 - **Shaft** — Conductivity, Stability, and at levels 10, 20 and 30 a new carved socket with no Stability cost.
-- **Cap** — Velocity, Focus, Bite multipliers, and at level 15 a chance to open a flank socket.
+- **Tip** — Velocity, Focus, Bite multipliers, and at level 15 a chance to open a flank socket.
 
-Because parts level separately, grafting is never a loss: a level-22 Silver cap moved onto a fresh Yew shaft keeps its 22 levels, and the wand's level shown in the UI is the average of its three parts.
+Because parts level separately, grafting is never a loss: a level-22 Silver tip moved onto a fresh Yew shaft keeps its 22 levels, and the wand's level shown in the UI is the average of its three parts.
 
 ## Legendary components
 
@@ -454,7 +454,7 @@ Legendaries are named, one-of-a-kind crystals and wand parts that break a rule o
 - A legendary's tooltip shows its stats, its known effect, and one line per hidden resonance as `??? — reacts with something Fire-born`, a vague hint.
 - The first time a resonance triggers, the shot flashes gold, the effect is named, and it is written into the **Wandwright's Codex**. From then on it is shown in full on every wand.
 - Two legendaries in the same wand can also form a **legendary pair**: a unique named spell nobody can make any other way.
-- Limit: one legendary crystal per wand, plus any legendary grip, shaft or cap. A full-legendary wand is possible but extremely rare.
+- Limit: one legendary crystal per wand, plus any legendary hilt, shaft or tip. A full-legendary wand is possible but extremely rare.
 
 ### Legendary crystals
 
@@ -468,18 +468,18 @@ Legendaries are named, one-of-a-kind crystals and wand parts that break a rule o
 | Seed of the World Tree | Earth shots plant saplings that grow into cover during the fight | Trees count as a Plant draw source; Verdant Stone makes them fight for you |
 | Gravewish Pearl | Kills leave a ghost that repeats the enemy's last attack for you | With Ashen Yew, ghosts last until dawn and follow you |
 
-### Legendary grips, shafts and caps
+### Legendary hilts, shafts and tips
 
 | Name | Part | Known effect | Hidden resonance (spoiler) |
 | --- | --- | --- | --- |
-| Hand of the Hollow Saint | Grip | Recharges from enemies' fear: each fleeing enemy refills charge | With Fearglass, fear spreads in waves and the grip overflows into a shield |
-| Wyrmhide Grip | Grip | Every overload is a Wild surge, but backlash is doubled | With Dragon Rib shaft, backlash heals you instead |
+| Hand of the Hollow Saint | Hilt | Recharges from enemies' fear: each fleeing enemy refills charge | With Fearglass, fear spreads in waves and the hilt overflows into a shield |
+| Wyrmhide Hilt | Hilt | Every overload is a Wild surge, but backlash is doubled | With Dragon Rib shaft, backlash heals you instead |
 | Spine of Aldrath | Shaft | 7 spine sockets, with a flank between every pair | With all four elements, the flanks become Aether sockets |
 | Moonwell Rod | Shaft | Crystals rotate one socket each in-game night: the same wand plays differently each day | Under a full moon it stops rotating and locks in +50% |
 | Weeping Mournwood | Shaft | Each crystal's element slowly seeps into its neighbor over time | Left alone for 7 days, it grows a new legendary crystal |
-| Crown of Three Suns | Cap | Each shot fires three versions: the chain as built, reversed, and element-only | With Prismglass body, the three versions merge into one white beam |
-| Bell of the Deep | Cap | Hits "tune" enemies; tuned enemies take a share of every nearby hit | Tuned enemies hit by Water ring like bells and stun the area |
-| Mirrorcap of Vael | Cap | Shots that meet enemy projectiles reflect them | With Wallglass, walls become mirrors that return spells |
+| Crown of Three Suns | Tip | Each shot fires three versions: the chain as built, reversed, and element-only | With Prismglass body, the three versions merge into one white beam |
+| Bell of the Deep | Tip | Hits "tune" enemies; tuned enemies take a share of every nearby hit | Tuned enemies hit by Water ring like bells and stun the area |
+| Mirrorcap of Vael | Tip | Shots that meet enemy projectiles reflect them | With Wallglass, walls become mirrors that return spells |
 
 ### Legendary pairs (examples)
 
@@ -496,7 +496,6 @@ The player carries two wands: the main hand attacks, the off hand defends, and b
 - **Main hand (attack)** — fires the chain as described in this doc.
 - **Off hand (ward)** — the same chain builds a defense instead of a shot: a shield, barrier, dash, or counter.
 - **Swap hands** — one key swaps them mid-fight. Your fire attack wand becomes a fire ward and the other way round, so a well-built pair gives four tools.
-- **Staff option** — a two-handed staff (up to 7 sockets) gives up the ward for raw power.
 
 ### How the off hand reads crystals
 
@@ -644,8 +643,8 @@ The character has 13 slots; the two wands are the heart, and every other slot fe
 
 | Slot | Count | What goes there | How it ties to wands |
 | --- | --- | --- | --- |
-| Main-hand wand | 1 | Grip + shaft + cap, with crystals | Your attack |
-| Off-hand wand | 1 | Same parts, read as wards | Your defense; or empty if using a staff |
+| Main-hand wand | 1 | Hilt + shaft + tip, with crystals | Your attack |
+| Off-hand wand | 1 | Same parts, read as wards | Your defense |
 | Head (hood, circlet, crown) | 1 | Headgear | +Focus, sight radius; some add a pommel effect to both wands |
 | Body (robe, coat, bark-armor) | 1 | Armor | Health and resistances; heavy armor −Tempo, light armor +Reflex |
 | Hands (gloves, gauntlets) | 1 | Gloves | Grip feel: Tempo, overload backlash, parry window |
@@ -654,14 +653,14 @@ The character has 13 slots; the two wands are the heart, and every other slot fe
 | Amulet | 1 | Charm | Adds one ring socket effect to both wands |
 | Rings | 2 | Rings | Element affinity, mark strength, legendary resonance boosts |
 | Cloak | 1 | Cloak | Element resistance; the cloak's element tints your off-hand ward |
-| Satchel | 1 | Reagent satchel | Holds spare grips, shafts, caps for crafting anywhere; size = how many |
+| Satchel | 1 | Reagent satchel | Holds spare hilts, shafts, tips for crafting anywhere; size = how many |
 | Familiar | 1 | Companion creature | Carries one crystal and fires it as a tiny third wand |
 
 ### Starting kit (every class)
 
 - Two class wands (see the class table).
 - Cloth hood, robe, gloves, boots and belt with 1 open pouch.
-- A small satchel with one spare grip, shaft and cap of the class's material.
+- A small satchel with one spare hilt, shaft and tip of the class's material.
 - Four Chipped crystals of random elements and a Wandwright's Codex (empty).
 
 Rings, amulet, cloak and familiar start empty and are earned in the first hours, so the first loot always feels like it opens a new part of the system.
@@ -714,7 +713,7 @@ The camera looks down at a 3D world from a three-quarter angle, which shows exac
 5. Level up: attribute points and a skill node, sometimes a bridge that unlocks a neighbor's tricks.
 6. Chase a legendary, discover a hidden resonance, record it in the Codex, and rebuild around it.
 
-The next design step would be enemies and biomes built to test specific builds, such as fire-immune golems that force a second element, or warded casters that reward Cold Iron caps.
+The next design step would be enemies and biomes built to test specific builds, such as fire-immune golems that force a second element, or warded casters that reward Cold Iron tips.
 
 ## Tutorial and practice grounds
 
@@ -726,12 +725,12 @@ Each lesson teaches one rule, ends with a short dummy challenge, and pays a real
 
 | # | Lesson | Rule it teaches | Challenge | Reward |
 | --- | --- | --- | --- | --- |
-| 1 | A Stick and a Spark | Grip + shaft + cap make a wand; read the stat sheet | Socket a Fire crystal in a bare Chalk twig and hit the Straw Dummy | Your class wands |
+| 1 | A Stick and a Spark | Hilt + shaft + tip make a wand; read the stat sheet | Socket a Fire crystal in a bare Chalk twig and hit the Straw Dummy | Your class wands |
 | 2 | The First Crystal | Element crystals and Bite | Break the Stone Sentinel's shell with the right element | 2 Clear element crystals |
 | 3 | Order Matters | Forward flow; before vs after a multiplier | Hit 3 dummies at once, then do it at half the drain | Twinspar |
 | 4 | When Elements Meet | Core and coat reactions | Make Steam, then Boiling Jet, from the same two crystals | Codex reaction page |
 | 5 | Wood and Fire | Material harmony and clash | Win using a clash on purpose (Fire in Willow for steam) | A spare Willow shaft |
-| 6 | Too Much Heat | Heat, Stability, overload table | Overload safely 3 times; get one Wild surge | Amethyst grip |
+| 6 | Too Much Heat | Heat, Stability, overload table | Overload safely 3 times; get one Wild surge | Amethyst hilt |
 | 7 | The Side Socket | Flank sockets and halos | Fit a Catalyst flank and double a reaction | A wand with a flank |
 | 8 | Echoes in the Wood | Feedback loops, Resonator, Dampener | Build a 2-loop shot that does not overload | Resonator |
 | 9 | Two Hands | Off-hand wards, hand swap, cross-current | Fire through your own ward to change your shot | Starting off-hand upgrade |
@@ -767,7 +766,7 @@ In the Hollow, every material, part and crystal you have **ever discovered** is 
 | --- | --- | --- |
 | Straw Dummy | Raw damage, damage per second | Stands still; shows a live damage log |
 | Stone Sentinel | Earth, armor break, Stone Bite | Heavy shell that must crack first |
-| Iron Knight | Metal armor and magic wards | Plate armor and a ward bubble; Cold Iron caps shine |
+| Iron Knight | Metal armor and magic wards | Plate armor and a ward bubble; Cold Iron tips shine |
 | Wisp Lantern | Spirit Bite, accuracy | Floats and phases out every few seconds |
 | Treant Stump | Fire, Plant Bite | Regrows health unless burning |
 | Ember Golem | Element switching | Immune to Fire; forces a second element |
